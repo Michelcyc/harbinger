@@ -1,4 +1,4 @@
-teste 222
+
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # <img src='https://raw.githubusercontent.com/cefet-rj-dal/harbinger/master/inst/logo.png' align='centre' height='150' width='129'/> Harbinger
