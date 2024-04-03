@@ -1,6 +1,9 @@
-load_library("daltoolbox")
-load_library("harbinger")
-source("my_utils.R")
+library("daltoolbox")
+remove.packages("harbinger")
+devtools::install_github("Michelcyc/harbinger", force=TRUE, upgrade="never")
+library("harbinger")
+packageVersion("harbinger")
+source("michelFiles/my_utils.R")
 data("har_examples")
 
 dataset <- har_examples[[15]]
@@ -21,3 +24,4 @@ softEval <- evaluate(har_eval_soft(), fitted_detection_model$event, dataset$even
 printEval(softEval)
 
 printEvalComparison(softEval, hardEval)
+
