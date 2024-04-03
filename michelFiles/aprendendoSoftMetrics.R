@@ -1,8 +1,4 @@
-# Remove todos os objetos
-rm(list = ls())
-# Limpa a memória não utilizada
-gc()
-
+quit(save = "no")
 library("daltoolbox")
 remove.packages("harbinger")
 devtools::install_github("Michelcyc/harbinger", force=TRUE, upgrade="never")
