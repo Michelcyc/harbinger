@@ -1,4 +1,4 @@
-quit(save = "no")
+#quit(save = "no")
 library("daltoolbox")
 remove.packages("harbinger")
 devtools::install_github("Michelcyc/harbinger", force=TRUE, upgrade="never")
