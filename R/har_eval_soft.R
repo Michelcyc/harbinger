@@ -46,8 +46,7 @@ soft_scores <- function(detection, event, k){
   D <- which(detection)
   n <- length(D)
 
-  #mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
-  mu <- function(j,i,E,D,k) max(0, 0)
+  mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
 
   Mu <- matrix(NA,nrow = n, ncol = m)
   for(j in 1:m) for(i in 1:n) Mu[i,j] <- mu(j,i,E,D,k)
