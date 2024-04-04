@@ -31,22 +31,45 @@
 #'# ploting the results
 #'grf <- har_plot(model, dataset$serie, detection, dataset$event)
 #'plot(grf)
+
+
+#har_eval_soft <- function(sw_size = 15) {
+#  obj <- har_eval()
+#  obj$sw_size <- sw_size
+#  class(obj) <- append("har_eval_soft", class(obj))
+#  return(obj)
+#}
+
 #'@export
-har_eval_soft <- function(sw_size = 15) {
+har_eval_soft <- function(sw_size = 15, shape="triangle") {
+  possible_shapes <- c("triangle", "square", "trapezoid")
+
+  if (!(shape %in% possible_shapes)) {
+    stop("Invalid shape.")
+  }
+
   obj <- har_eval()
   obj$sw_size <- sw_size
+  obj$shape <- shape
   class(obj) <- append("har_eval_soft", class(obj))
+
   return(obj)
 }
 
-soft_scores <- function(detection, event, k){
+
+soft_scores <- function(detection, event, k, shape){
   E <- which(event)
   m <- length(E)
 
   D <- which(detection)
   n <- length(D)
 
-  mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
+  if (shape == 'triangle') {
+    mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
+  }
+  else if (shape == 'break') {
+    mu <- function(j,i,E,D,k) max(0,0)
+  }
 
   Mu <- matrix(NA,nrow = n, ncol = m)
   for(j in 1:m) for(i in 1:n) Mu[i,j] <- mu(j,i,E,D,k)
@@ -80,7 +103,7 @@ soft_scores <- function(detection, event, k){
 #'@export
 evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   detection[is.na(detection)] <- FALSE
-  scores <- soft_scores(detection, event, obj$sw_size)
+  scores <- soft_scores(detection, event, obj$sw_size, obj$shape)
 
   m <- length(which(event))
   t <- length(event)
