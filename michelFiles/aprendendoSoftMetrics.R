@@ -27,4 +27,3 @@ softSquare <- evaluate(har_eval_soft(shape='square'), fitted_detection_model$eve
 printEval(softSquare)
 
 printEvalComparison(softEval, hardEval)
-
