@@ -67,7 +67,7 @@ soft_scores <- function(detection, event, k, shape){
   if (shape == 'triangle') {
     mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
   }
-  else if (shape == 'break') {
+  else if (shape == 'square') {
     mu <- function(j,i,E,D,k) max(0,0)
   }
 

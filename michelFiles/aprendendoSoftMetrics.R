@@ -20,8 +20,11 @@ plot(grf)
 hardEval <- evaluate(har_eval(), fitted_detection_model$event, dataset$event)
 printEval(hardEval)
 
-softEval <- evaluate(har_eval_soft(), fitted_detection_model$event, dataset$event)
-printEval(softEval)
+softTriangle <- evaluate(har_eval_soft(), fitted_detection_model$event, dataset$event)
+printEval(softTriangle)
+
+softBreak <- evaluate(har_eval_soft(shape='square'), fitted_detection_model$event, dataset$event)
+printEval(softBreak)
 
 printEvalComparison(softEval, hardEval)
 
