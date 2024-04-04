@@ -23,8 +23,8 @@ printEval(hardEval)
 softTriangle <- evaluate(har_eval_soft(), fitted_detection_model$event, dataset$event)
 printEval(softTriangle)
 
-softBreak <- evaluate(har_eval_soft(shape='square'), fitted_detection_model$event, dataset$event)
-printEval(softBreak)
+softSquare <- evaluate(har_eval_soft(shape='square'), fitted_detection_model$event, dataset$event)
+printEval(softSquare)
 
 printEvalComparison(softEval, hardEval)
 

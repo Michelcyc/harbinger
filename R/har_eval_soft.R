@@ -42,7 +42,7 @@
 
 #'@export
 har_eval_soft <- function(sw_size = 15, shape="triangle") {
-  possible_shapes <- c("triangle", "square", "trapezoid")
+  possible_shapes <- c("triangle", "sqrt", "exp")
 
   if (!(shape %in% possible_shapes)) {
     stop("Invalid shape.")
@@ -67,8 +67,8 @@ soft_scores <- function(detection, event, k, shape){
   if (shape == 'triangle') {
     mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
   }
-  else if (shape == 'square') {
-    mu <- function(j,i,E,D,k) max(0,0)
+  else if (shape == 'sqrt') {
+    mu <- function(j,i,E,D,k) max(min( sqrt((D[i]-(E[j]-k))/k), sqrt(((E[j]+k)-D[i])/k) ), 0)
   }
 
   Mu <- matrix(NA,nrow = n, ncol = m)
