@@ -31,48 +31,22 @@
 #'# ploting the results
 #'grf <- har_plot(model, dataset$serie, detection, dataset$event)
 #'plot(grf)
-
-
-#har_eval_soft <- function(sw_size = 15) {
-#  obj <- har_eval()
-#  obj$sw_size <- sw_size
-#  class(obj) <- append("har_eval_soft", class(obj))
-#  return(obj)
-#}
-
 #'@export
-har_eval_soft <- function(sw_size = 15, shape="triangle") {
-  possible_shapes <- c("triangle", "sqrt", "exp")
-
-  if (!(shape %in% possible_shapes)) {
-    stop("Invalid shape.")
-  }
-
+har_eval_soft <- function(sw_size = 15) {
   obj <- har_eval()
   obj$sw_size <- sw_size
-  obj$shape <- shape
   class(obj) <- append("har_eval_soft", class(obj))
-
   return(obj)
 }
 
-
-soft_scores <- function(detection, event, k, shape){
+soft_scores <- function(detection, event, k){
   E <- which(event)
   m <- length(E)
 
   D <- which(detection)
   n <- length(D)
 
-  if (shape == 'triangle') {
-    mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
-  }
-  else if (shape == 'sqrt') {
-    mu <- function(j,i,E,D,k) max(min( sqrt((D[i]-(E[j]-k))/k), sqrt(((E[j]+k)-D[i])/k) ), 0)
-  }
-  else if (shape == 'exp') {
-    mu <- function(j,i,E,D,k) max(min( ((D[i]-(E[j]-k))/k)^2, (((E[j]+k)-D[i])/k)^2 ), 0)
-  }
+  mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
 
   Mu <- matrix(NA,nrow = n, ncol = m)
   for(j in 1:m) for(i in 1:n) Mu[i,j] <- mu(j,i,E,D,k)
@@ -106,7 +80,7 @@ soft_scores <- function(detection, event, k, shape){
 #'@export
 evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   detection[is.na(detection)] <- FALSE
-  scores <- soft_scores(detection, event, obj$sw_size, obj$shape)
+  scores <- soft_scores(detection, event, obj$sw_size)
 
   m <- length(which(event))
   t <- length(event)
