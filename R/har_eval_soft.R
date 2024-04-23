@@ -39,9 +39,6 @@ har_eval_soft <- function(sw_size = 15) {
   return(obj)
 }
 
-install.packages('RcppHungarian')
-library(RcppHungarian)
-
 soft_scores <- function(detection, event, k){
   E <- which(event)
   m <- length(E)

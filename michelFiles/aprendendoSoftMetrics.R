@@ -1,9 +1,13 @@
+remove.packages("harbinger")
 quit(save = "no")
 library("daltoolbox")
-remove.packages("harbinger")
 devtools::install_github("Michelcyc/harbinger", force=TRUE, upgrade="never")
 library("harbinger")
 source("michelFiles/my_utils.R")
+
+install.packages('RcppHungarian')
+library(RcppHungarian)
+
 data("har_examples")
 
 dataset <- har_examples[[15]]
