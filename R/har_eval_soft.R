@@ -70,7 +70,11 @@ soft_scores <- function(detection, event, k){
   #for(i in 1:n) S_d[i] <- max(S_e[which(d_e == i)], 0)
 
   associationMatrix = HungarianSolver(-1*Mu); # To maximize (minimize the inverse)
-  return(Mu[associationMatrix$pairs]) # Send a vector of scores
+  scores <- Mu[associationMatrix$pairs]
+  while(length(scores) < n) {
+    scores <- append(scores, 0);
+  }
+  return(scores) # Send a vector of unordered scores with 0s in FPs
 }
 
 #'@importFrom daltoolbox evaluate

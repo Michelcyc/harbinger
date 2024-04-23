@@ -1,7 +1,7 @@
 remove.packages("harbinger")
 quit(save = "no")
 library("daltoolbox")
-devtools::install_github("Michelcyc/harbinger", force=TRUE, upgrade="never")
+#devtools::install_github("Michelcyc/harbinger", force=TRUE, upgrade="never")
 library("harbinger")
 source("michelFiles/my_utils.R")
 
