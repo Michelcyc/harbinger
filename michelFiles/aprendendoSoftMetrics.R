@@ -1,7 +1,7 @@
 remove.packages("harbinger")
 quit(save = "no")
 library("daltoolbox")
-#devtools::install_github("Michelcyc/harbinger", force=TRUE, upgrade="never")
+devtools::install_github("Michelcyc/harbinger", force=TRUE, upgrade="never")
 library("harbinger")
 source("michelFiles/my_utils.R")
 
@@ -11,10 +11,6 @@ library(RcppHungarian)
 data("har_examples")
 
 dataset <- har_examples[[2]]
-dataset[51,1] <- 0.8
-dataset[51,2] <- TRUE
-dataset[54,1] <- 0.2
-dataset[54,2] <- TRUE
 
 indexDaSerie <- 1:length(dataset$serie)
 plot_ts(x=indexDaSerie, y=dataset$serie)
