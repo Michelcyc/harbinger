@@ -1,7 +1,7 @@
 remove.packages("harbinger")
 quit(save = "no")
 library("daltoolbox")
-#devtools::install_github("Michelcyc/harbinger", force=TRUE, upgrade="never")
+devtools::install_github("Michelcyc/harbinger", force=TRUE, upgrade="never")
 library("harbinger")
 source("michelFiles/my_utils.R")
 
@@ -25,8 +25,8 @@ fitted_detection_model <- detect(obj = har_fitted_model, dataset$serie)
 grf <- har_plot(har_fitted_model, dataset$serie, fitted_detection_model, dataset$event)
 plot(grf)
 
-softEval <- evaluate(har_eval_soft(sw_size=10), fitted_detection_model$event, dataset$event)
-printEval(softEval)
+newSoftEval <- evaluate(har_eval_soft(sw_size=10), fitted_detection_model$event, dataset$event)
+printEval(newSoftEval)
 
 hardEval <- evaluate(har_eval(), fitted_detection_model$event, dataset$event)
 printEval(hardEval)
