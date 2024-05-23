@@ -73,7 +73,7 @@ soft_scores <- function(detection, event, k){
   S_d <- c()
   for(i in 1:n) S_d[i] <- max(S_e[which(d_e == i)], 0)
 
-  print(S_d) ## Método para ver o que sai da função
+  cat(S_d) ## Método para ver o que sai da função
   return(S_d)
 }
 
