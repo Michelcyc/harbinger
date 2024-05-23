@@ -6,10 +6,10 @@
 #'library(daltoolbox)
 #'
 #'#loading the example database
-#'data(examples_anomalies)
+#'data(har_examples)
 #'
-#'#Using the simple
-#'dataset <- examples_anomalies$simple
+#'#Using the time series 14
+#'dataset <- har_examples$example14
 #'head(dataset)
 #'
 #'# setting up time change point using GARCH
@@ -51,30 +51,19 @@ soft_scores <- function(detection, event, k){
   Mu <- matrix(NA,nrow = n, ncol = m)
   for(j in 1:m) for(i in 1:n) Mu[i,j] <- mu(j,i,E,D,k)
 
-  E_d <- list()
-  for(i in 1:n) E_d[[i]] <- which(Mu[i,] == max(Mu[i,]))
+  # To maximize the score we need to minimize the inverse
+  associationMatrix <- HungarianSolver(-1*Mu);
+  # associationMatrix$pairs contains the index pairs of detection x event
 
-  D_e <- list()
-  for(j in 1:m) D_e[[j]] <- which(sapply(1:n, function(i) j %in% E_d[[i]] & Mu[i,j] > 0))
+  # Create a vector with the scores of each association
+  scores <- Mu[associationMatrix$pairs]
 
-  d_e <- c()
-  for(j in 1:m) {
-    if(length(D_e[[j]])==0) d_e[j] <- NA
-    else d_e[j] <- D_e[[j]][which.max(sapply(D_e[[j]], function(i) Mu[i,j]))]
+  # To calculate soft metrics we need a bigger vector
+  # Fill the scores vector with 0 score for each non-associated detection
+  while(length(scores) < n) {
+    scores <- append(scores, 0);
   }
-
-  S_e <- c()
-  for(j in 1:m) {
-    if(length(D_e[[j]])==0) S_e[j] <- NA
-    #else S_e[j] <- sum(sapply(D_e[[j]], function(i) Mu[i,j])) / length(D_e[[j]]) #mean
-    else S_e[j] <- max(sapply(D_e[[j]], function(i) Mu[i,j]))  #max
-  }
-
-  S_d <- c()
-  for(i in 1:n) S_d[i] <- max(S_e[which(d_e == i)], 0)
-
-  print(S_d) ## Método para ver o que sai da função
-  return(S_d)
+  return(scores) # Send a vector of scores with 0s representing the FPs
 }
 
 #'@importFrom daltoolbox evaluate
