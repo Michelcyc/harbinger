@@ -51,19 +51,9 @@ soft_scores <- function(detection, event, k){
   Mu <- matrix(NA,nrow = n, ncol = m)
   for(j in 1:m) for(i in 1:n) Mu[i,j] <- mu(j,i,E,D,k)
 
-  # To maximize the score we need to minimize the inverse
   associationMatrix <- HungarianSolver(-1*Mu);
-  # associationMatrix$pairs contains the index pairs of detection x event
-
-  # Create a vector with the scores of each association
   scores <- Mu[associationMatrix$pairs]
-  cat(scores)
-  # To calculate soft metrics we need a bigger vector
-  # Fill the scores vector with 0 score for each non-associated detection
-#  while(length(scores) < n) {
-#    scores <- append(scores, 0);
-#  }
-  return(scores) # Send a vector of scores with 0s representing the FPs
+  return(scores)
 }
 
 #'@importFrom daltoolbox evaluate
