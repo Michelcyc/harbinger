@@ -8,7 +8,7 @@
 3Ra - Realizar meus próprios testes
 3Rb - Comparar com resultados dos testes da Rebecca
 4- Como 3Ra?
-4R- Descobrir qual é a função que a Rebecca usou e adaptar pra mim (END)
+4R- Descobrir qual é a função que a Rebecca usou e adaptar pra mim (END - Task 1)
 5- Como 3Rb?
 5R- Usar os resultados de 4R e comparar
 6- Como 2Rb ?
