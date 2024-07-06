@@ -154,11 +154,6 @@ for (i in 1:length(datasets)) {
       model <- fit(model, dataset$serie)
       detection <- detect(model, dataset$serie)
     }
-    else if (j==8) { # EMD
-      model <- hanr_emd()
-      model <- fit(model, dataset$serie)
-      detection <- detect(model, dataset$serie)
-    }
     # Metrics
     execution_time <- system.time({
       eval <- evaluate(har_eval(), detection$event, dataset$Classe)
