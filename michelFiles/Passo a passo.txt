@@ -1,15 +1,24 @@
-1- O que eu quero?
-1R - Estruturas de dados com resultados de testes para plotar resultados
-2- Como 1R?
-2R - Criar arquivos .R que realizem procedimentos de testes
-2Ra - Comparar Precions e Recall em diferentes tolerâncias temporais
-2Rb - Comparar Precions e Recall em datasets selecionados onde ocorre a questão tratada no trabalho
-3- Como 2Ra?
-3Ra - Realizar meus próprios testes
-3Rb - Comparar com resultados dos testes da Rebecca
-4- Como 3Ra?
-4R- Descobrir qual é a função que a Rebecca usou e adaptar pra mim (END - Task 1)
-5- Como 3Rb?
-5R- Usar os resultados de 4R e comparar
-6- Como 2Rb ?
-6R- Selecionar somente datasets com mais de um evento onde o espaço entre os eventos seja menor que o intervalo de tolerância. Realizar testes nesses datasets.
+preciso de
+
+hard$'all_metrics'[1...100]
+hard$time[1...100]
+o mesmo para soft1 e soft2
+
+eval$TP
+eval$FP
+eval$FN
+eval$TN
+eval$accuracy
+eval$sensitivity
+eval$specificity
+eval$prevalence
+eval$PPV
+eval$NPV
+eval$detection_rate
+eval$detection_prevalence
+eval$balanced_accuracy
+eval$precision
+eval$recall
+eval$F1
+eval$time
+

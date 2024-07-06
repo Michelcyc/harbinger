@@ -27,8 +27,8 @@ detection <- detect(obj = model, dataset$serie)
 #grf <- har_plot(har_fitted_model, dataset$PreprocessedSeries, fitted_detection_model, dataset$Classe)
 #plot(grf)
 
-# FBIAD
-model <- hanr_fbiad()
+#DTW
+model <- hanct_dtw(3)
 model <- fit(model, dataset$serie)
 detection <- detect(model, dataset$serie)
 
@@ -163,6 +163,8 @@ for (i in 1:length(datasets)) {
       detection <- detect(model, dataset$serie)
     }
 
+
+
     # Metrics
     execution_time <- system.time({
       eval <- evaluate(har_eval_soft(sw_size=3), detection$event, dataset$Classe)   # SW = 3
@@ -177,7 +179,7 @@ for (i in 1:length(datasets)) {
   }
 }
 
-save(soft1, file = "michelFiles/.soft1.RData")
+save(soft1, file = "michelFiles/soft1.RData")
 
 #  ------------------------------ END SOFT1 test --------------------------- #
 
