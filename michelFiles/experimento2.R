@@ -10,23 +10,143 @@ library("harbinger")
 library(readr)
 source("michelFiles/my_utils.R")
 
-dataset <- read_csv('michelFiles/meus_dados.csv')
+dataset <- read_csv('michelFiles/futuros_ibov_2019.csv')
+names(dataset)[names(dataset) == "PreprocessedSeries"] <- "serie"
+dataset <- head(dataset, 20000)
+
+dataset <- read_csv('michelFiles/futuros_aus200_2019.csv')
+dataset <- head(dataset, 20000)
 
 #indexDaSerie <- 1:length(dataset$PreprocessedSeries)
 #plot_ts(x=indexDaSerie, y=dataset$PreprocessedSeries)
 
-har_model <- hanr_arima()
-har_fitted_model <- fit(har_model, dataset$PreprocessedSeries)
-fitted_detection_model <- detect(obj = har_fitted_model, dataset$PreprocessedSeries)
+# ARIMA
+model <- hanr_arima()
+model <- fit(model, dataset$serie)
+detection <- detect(obj = model, dataset$serie)
 #grf <- har_plot(har_fitted_model, dataset$PreprocessedSeries, fitted_detection_model, dataset$Classe)
 #plot(grf)
 
-newSoftEval <- evaluate(har_eval_soft(sw_size=10), fitted_detection_model$event, dataset$Classe)
-printEval(newSoftEval)
-
-hardEval <- evaluate(har_eval(), fitted_detection_model$event, dataset$Classe)
-printEval(hardEval)
+# FBIAD
+model <- hanr_fbiad()
+model <- fit(model, dataset$serie)
+detection <- detect(model, dataset$serie)
 
 execution_time <- system.time({
-  hardEval <- evaluate(har_eval(), fitted_detection_model$event, dataset$Classe)
+  newSoftEval <- evaluate(har_eval_soft(sw_size=2), detection$event, dataset$Classe)
+  printEval(newSoftEval)
 })
+execution_time
+
+
+execution_time <- system.time({
+  hardEval <- evaluate(har_eval(), detection$event, dataset$Classe)
+  printEval(hardEval)
+})
+execution_time
+
+
+# ------- Teste massivo com 2 ---------- #
+
+# HARD #
+hard <- list(
+  TP = vector("list", 100),
+  FP = vector("list", 100),
+  FN = vector("list", 100),
+  TN = vector("list", 100),
+  accuracy = vector("list", 100),
+  sensitivity = vector("list", 100),
+  specificity = vector("list", 100),
+  prevalence = vector("list", 100),
+  PPV = vector("list", 100),
+  NPV = vector("list", 100),
+  detection_rate = vector("list", 100),
+  detection_prevalence = vector("list", 100),
+  balanced_accuracy = vector("list", 100),
+  precision = vector("list", 100),
+  recall = vector("list", 100),
+  F1 = vector("list", 100),
+  time = vector("list", 100)
+)
+
+# SOFT_1 #
+soft1 <- list(
+  TP = vector("list", 100),
+  FP = vector("list", 100),
+  FN = vector("list", 100),
+  TN = vector("list", 100),
+  accuracy = vector("list", 100),
+  sensitivity = vector("list", 100),
+  specificity = vector("list", 100),
+  prevalence = vector("list", 100),
+  PPV = vector("list", 100),
+  NPV = vector("list", 100),
+  detection_rate = vector("list", 100),
+  detection_prevalence = vector("list", 100),
+  balanced_accuracy = vector("list", 100),
+  precision = vector("list", 100),
+  recall = vector("list", 100),
+  F1 = vector("list", 100),
+  time = vector("list", 100)
+)
+
+# SOFT_2 #
+soft1 <- list(
+  TP = vector("list", 100),
+  FP = vector("list", 100),
+  FN = vector("list", 100),
+  TN = vector("list", 100),
+  accuracy = vector("list", 100),
+  sensitivity = vector("list", 100),
+  specificity = vector("list", 100),
+  prevalence = vector("list", 100),
+  PPV = vector("list", 100),
+  NPV = vector("list", 100),
+  detection_rate = vector("list", 100),
+  detection_prevalence = vector("list", 100),
+  balanced_accuracy = vector("list", 100),
+  precision = vector("list", 100),
+  recall = vector("list", 100),
+  F1 = vector("list", 100),
+  time = vector("list", 100)
+)
+
+# Criar um for loop para cada. Ajustar 2 loops: loop de datasets e loop de detectores
+
+#  ------------------------------ HARD test --------------------------- #
+for (i in 1:2) {
+  #Tests
+
+
+  # Metrics
+  execution_time <- system.time({
+    eval <- evaluate(har_eval(), detection$event, dataset$Classe)
+  })
+  for (name in names(eval)) {
+    hard[[name]][[i]] <- eval[[name]]
+  }
+  hard[['time']][[i]] <- unname(execution_time['elapsed'])
+}
+
+# Check a specific attribute in 'hard'
+print(hard)
+#  ------------------------------ END HARD test --------------------------- #
+
+#  ------------------------------ SOFT test --------------------------- #
+for (i in 1:2) {
+  #Tests
+
+
+  # Metrics
+  execution_time <- system.time({
+    eval <- evaluate(har_eval_soft(sw_size=3), detection$event, dataset$Classe)
+  })
+  for (name in names(eval)) {
+    hard[[name]][[i]] <- eval[[name]]
+  }
+  hard[['time']][[i]] <- unname(execution_time['elapsed'])
+}
+
+# Check a specific attribute in 'hard'
+print(hard)
+#  ------------------------------ END SOFT test --------------------------- #
