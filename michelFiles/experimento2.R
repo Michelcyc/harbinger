@@ -27,8 +27,7 @@ detection <- detect(obj = model, dataset$serie)
 #grf <- har_plot(har_fitted_model, dataset$PreprocessedSeries, fitted_detection_model, dataset$Classe)
 #plot(grf)
 
-#DTW
-model <- hanct_dtw(3)
+model <- hanr_remd()
 model <- fit(model, dataset$serie)
 detection <- detect(model, dataset$serie)
 
@@ -114,7 +113,7 @@ soft2 <- list(
 # Criar um for loop para cada. Ajustar 2 loops: loop de datasets e loop de detectores
 
 #  ------------------------------ HARD test --------------------------- #
-n_methods <- 3
+n_methods <- 8
 
 for (i in 1:length(datasets)) {
   for (j in 1:n_methods) {
@@ -135,7 +134,31 @@ for (i in 1:length(datasets)) {
       model <- fit(model, dataset$serie)
       detection <- detect(model, dataset$serie)
     }
-
+    else if (j==4) { # K-means
+      model <- hanct_kmeans(3)
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
+    else if (j==5) { # FFT
+      model <- hanr_fft()
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
+    else if (j==6) { # GARCH
+      model <- hanr_garch()
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
+    else if (j==7) { #Wavelet
+      model <- hanr_wavelet()
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
+    else if (j==8) { # EMD
+      model <- hanr_emd()
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
     # Metrics
     execution_time <- system.time({
       eval <- evaluate(har_eval(), detection$event, dataset$Classe)
