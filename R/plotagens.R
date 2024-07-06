@@ -1,36 +1,66 @@
-# Carregar pacotes necessários
+# Load necessary packages
 library(ggplot2)
 library(dplyr)
 library(tidyr)
 
-# Suponha que você tenha listas como essas (aqui, usando dados aleatórios para exemplo)
-set.seed(123)
-hard <- list(time = rnorm(1000, 0.12, 0.01), accuracy = rnorm(1000, 0.85, 0.05),
-             precision = rnorm(1000, 0.80, 0.04), recall = rnorm(1000, 0.78, 0.03))
-soft1 <- list(time = rnorm(1000, 0.10, 0.01), accuracy = rnorm(1000, 0.87, 0.04),
-              precision = rnorm(1000, 0.82, 0.03), recall = rnorm(1000, 0.79, 0.02))
-soft2 <- list(time = rnorm(1000, 0.11, 0.01), accuracy = rnorm(1000, 0.86, 0.05),
-              precision = rnorm(1000, 0.81, 0.04), recall = rnorm(1000, 0.77, 0.03))
+# Load the .RData files
+load("michelFiles/hard.RData")
+load("michelFiles/soft1.RData")
+load("michelFiles/soft2.RData")
 
-# Criar um dataframe a partir dessas listas
+mean_time_hard <- mean(unlist(hard$time))
+mean_time_soft1 <- mean(unlist(soft1$time))
+mean_time_soft2 <- mean(unlist(soft2$time))
+
+# NORMALIZING
+combined_time <- c(unlist(hard$time), unlist(soft1$time), unlist(soft2$time))
+
+# Step 2: Create a normalization function based on the combined time data
+min_time <- min(combined_time)
+max_time <- max(combined_time)
+normalize_time <- function(x) {
+  (x - min_time) / (max_time - min_time)
+}
+
+hard <- list(
+  accuracy = unlist(hard$accuracy),
+  precision = unlist(hard$precision),
+  recall = unlist(hard$recall),
+  time = normalize_time(unlist(hard$time))
+)
+soft1 <- list(
+  accuracy = unlist(soft1$accuracy),
+  precision = unlist(soft1$precision),
+  recall = unlist(soft1$recall),
+  time = normalize_time(unlist(soft1$time))
+)
+soft2 <- list(
+  accuracy = unlist(soft2$accuracy),
+  precision = unlist(soft2$precision),
+  recall = unlist(soft2$recall),
+  time = normalize_time(unlist(soft2$time))
+)
+
+# Create a combined data frame
 data <- bind_rows(
   as_tibble(hard) %>% mutate(Method = "Hard"),
-  as_tibble(soft1) %>% mutate(Method = "Soft1"),
-  as_tibble(soft2) %>% mutate(Method = "Soft2")
+  as_tibble(soft1) %>% mutate(Method = "Soft 1"),
+  as_tibble(soft2) %>% mutate(Method = "Soft 2")
 ) %>% pivot_longer(-Method, names_to = "Metric", values_to = "Value")
 
-# Verificar os dados
-print(head(data))
-
-# Criar o gráfico de caixa
+# Plot setup with no legends
 ggplot(data, aes(x = Metric, y = Value, fill = Method)) +
   geom_boxplot() +
-  labs(title = "Distribution of Metrics for Different Evaluation Methods",
-       x = "Metrics", y = "Values") +
+  labs(title = NULL,
+       x = NULL, y = NULL) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_brewer(palette = "Pastel1") + # Escolha de cores
-  guides(fill = guide_legend(title = "Method"))
+  theme(axis.text.x = element_text(hjust = 1, size = 14),  # Adjust text angle for better readability
+        legend.position = "right",
+        legend.title = element_text(size = 14, face = "bold"),  # Increase and bold the legend title font size
+        legend.text = element_text(size = 12),  # Increase the legend text font size
+        legend.key.size = unit(1.5, "lines")) +  # Increase the size of the legend keys
+  scale_fill_brewer(palette = "Pastel1") +
+  guides(fill = guide_legend(title = "Método"))
 
-# Exibir o gráfico
+# Save the plot
 ggsave("metric_distribution.png", width = 12, height = 8, units = "in")

@@ -10,45 +10,6 @@ library("harbinger")
 library(readr)
 
 
-source("michelFiles/my_utils.R")
-
-dataset <- read_csv('michelFiles/futuros_ibov_2019.csv')
-names(dataset)[names(dataset) == "PreprocessedSeries"] <- "serie"
-dataset <- head(dataset, 20000)
-
-dataset <- read_csv('michelFiles/futuros_aus200_2019.csv')
-dataset <- head(dataset, 20000)
-
-#indexDaSerie <- 1:length(dataset$PreprocessedSeries)
-#plot_ts(x=indexDaSerie, y=dataset$PreprocessedSeries)
-
-# ARIMA
-model <- hanr_arima()
-model <- fit(model, dataset$serie)
-detection <- detect(obj = model, dataset$serie)
-#grf <- har_plot(har_fitted_model, dataset$PreprocessedSeries, fitted_detection_model, dataset$Classe)
-#plot(grf)
-
-model <- hanr_remd()
-model <- fit(model, dataset$serie)
-detection <- detect(model, dataset$serie)
-
-execution_time <- system.time({
-  newSoftEval <- evaluate(har_eval_soft(sw_size=2), detection$event, dataset$Classe)
-  printEval(newSoftEval)
-})
-execution_time
-
-
-execution_time <- system.time({
-  hardEval <- evaluate(har_eval(), detection$event, dataset$Classe)
-  printEval(hardEval)
-})
-execution_time
-
-
-# ------- Teste massivo com 2 ---------- #
-
 # HARD #
 hard <- list(
   TP = vector("list", 70),
@@ -112,10 +73,11 @@ soft2 <- list(
   time = vector("list", 70)
 )
 
-# Criar um for loop para cada. Ajustar 2 loops: loop de datasets e loop de detectores
-
-#  ------------------------------ HARD test --------------------------- #
 n_methods <- 7
+
+# Criar um for loop para cada. Ajustar 2 loops: loop de datasets e loop de detectores
+#  ------------------------------ HARD test --------------------------- #
+
 
 for (i in 1:length(datasets)) {
   for (j in 1:n_methods) {
