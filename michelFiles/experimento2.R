@@ -114,8 +114,10 @@ soft2 <- list(
 # Criar um for loop para cada. Ajustar 2 loops: loop de datasets e loop de detectores
 
 #  ------------------------------ HARD test --------------------------- #
+n_methods <- 3
+
 for (i in 1:length(datasets)) {
-  for (j in 1:2) {
+  for (j in 1:n_methods) {
     #Tests
     dataset <- datasets[[i]]
     if (j==1) { # ARIMA
@@ -128,13 +130,17 @@ for (i in 1:length(datasets)) {
       model <- fit(model, dataset$serie)
       detection <- detect(model, dataset$serie)
     }
+    else if (j==3) { #DTW
+      model <- hanct_dtw(3)
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
 
     # Metrics
     execution_time <- system.time({
       eval <- evaluate(har_eval(), detection$event, dataset$Classe)
     })
-    index <- ( (i-1)* 2 + j)  # AJUSTAR o 2 para 10 !!!!!!!!
-    print(index)
+    index <- ( (i-1)* n_methods + j)
     print(paste(index, " from i=", i, "and j=", j))
     for (name in names(eval)) {
       hard[[name]][[index]] <- eval[[name]]
