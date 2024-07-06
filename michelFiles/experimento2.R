@@ -8,6 +8,8 @@ library(RcppHungarian)
 library("daltoolbox")
 library("harbinger")
 library(readr)
+
+
 source("michelFiles/my_utils.R")
 
 dataset <- read_csv('michelFiles/futuros_ibov_2019.csv')
@@ -49,71 +51,71 @@ execution_time
 
 # HARD #
 hard <- list(
-  TP = vector("list", 100),
-  FP = vector("list", 100),
-  FN = vector("list", 100),
-  TN = vector("list", 100),
-  accuracy = vector("list", 100),
-  sensitivity = vector("list", 100),
-  specificity = vector("list", 100),
-  prevalence = vector("list", 100),
-  PPV = vector("list", 100),
-  NPV = vector("list", 100),
-  detection_rate = vector("list", 100),
-  detection_prevalence = vector("list", 100),
-  balanced_accuracy = vector("list", 100),
-  precision = vector("list", 100),
-  recall = vector("list", 100),
-  F1 = vector("list", 100),
-  time = vector("list", 100)
+  TP = vector("list", 70),
+  FP = vector("list", 70),
+  FN = vector("list", 70),
+  TN = vector("list", 70),
+  accuracy = vector("list", 70),
+  sensitivity = vector("list", 70),
+  specificity = vector("list", 70),
+  prevalence = vector("list", 70),
+  PPV = vector("list", 70),
+  NPV = vector("list", 70),
+  detection_rate = vector("list", 70),
+  detection_prevalence = vector("list", 70),
+  balanced_accuracy = vector("list", 70),
+  precision = vector("list", 70),
+  recall = vector("list", 70),
+  F1 = vector("list", 70),
+  time = vector("list", 70)
 )
 
 # SOFT_1 #
 soft1 <- list(
-  TP = vector("list", 100),
-  FP = vector("list", 100),
-  FN = vector("list", 100),
-  TN = vector("list", 100),
-  accuracy = vector("list", 100),
-  sensitivity = vector("list", 100),
-  specificity = vector("list", 100),
-  prevalence = vector("list", 100),
-  PPV = vector("list", 100),
-  NPV = vector("list", 100),
-  detection_rate = vector("list", 100),
-  detection_prevalence = vector("list", 100),
-  balanced_accuracy = vector("list", 100),
-  precision = vector("list", 100),
-  recall = vector("list", 100),
-  F1 = vector("list", 100),
-  time = vector("list", 100)
+  TP = vector("list", 70),
+  FP = vector("list", 70),
+  FN = vector("list", 70),
+  TN = vector("list", 70),
+  accuracy = vector("list", 70),
+  sensitivity = vector("list", 70),
+  specificity = vector("list", 70),
+  prevalence = vector("list", 70),
+  PPV = vector("list", 70),
+  NPV = vector("list", 70),
+  detection_rate = vector("list", 70),
+  detection_prevalence = vector("list", 70),
+  balanced_accuracy = vector("list", 70),
+  precision = vector("list", 70),
+  recall = vector("list", 70),
+  F1 = vector("list", 70),
+  time = vector("list", 70)
 )
 
 # SOFT_2 #
 soft2 <- list(
-  TP = vector("list", 100),
-  FP = vector("list", 100),
-  FN = vector("list", 100),
-  TN = vector("list", 100),
-  accuracy = vector("list", 100),
-  sensitivity = vector("list", 100),
-  specificity = vector("list", 100),
-  prevalence = vector("list", 100),
-  PPV = vector("list", 100),
-  NPV = vector("list", 100),
-  detection_rate = vector("list", 100),
-  detection_prevalence = vector("list", 100),
-  balanced_accuracy = vector("list", 100),
-  precision = vector("list", 100),
-  recall = vector("list", 100),
-  F1 = vector("list", 100),
-  time = vector("list", 100)
+  TP = vector("list", 70),
+  FP = vector("list", 70),
+  FN = vector("list", 70),
+  TN = vector("list", 70),
+  accuracy = vector("list", 70),
+  sensitivity = vector("list", 70),
+  specificity = vector("list", 70),
+  prevalence = vector("list", 70),
+  PPV = vector("list", 70),
+  NPV = vector("list", 70),
+  detection_rate = vector("list", 70),
+  detection_prevalence = vector("list", 70),
+  balanced_accuracy = vector("list", 70),
+  precision = vector("list", 70),
+  recall = vector("list", 70),
+  F1 = vector("list", 70),
+  time = vector("list", 70)
 )
 
 # Criar um for loop para cada. Ajustar 2 loops: loop de datasets e loop de detectores
 
 #  ------------------------------ HARD test --------------------------- #
-n_methods <- 8
+n_methods <- 7
 
 for (i in 1:length(datasets)) {
   for (j in 1:n_methods) {
@@ -173,7 +175,7 @@ save(hard, file = "michelFiles/hard.RData")
 
 #  ------------------------------ SOFT1 test --------------------------- #
 for (i in 1:length(datasets)) {
-  for (j in 1:2) {
+  for (j in 1:n_methods) {
     #Tests
     dataset <- datasets[[i]]
     if (j==1) { # ARIMA
@@ -186,15 +188,36 @@ for (i in 1:length(datasets)) {
       model <- fit(model, dataset$serie)
       detection <- detect(model, dataset$serie)
     }
-
-
-
+    else if (j==3) { #DTW
+      model <- hanct_dtw(3)
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
+    else if (j==4) { # K-means
+      model <- hanct_kmeans(3)
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
+    else if (j==5) { # FFT
+      model <- hanr_fft()
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
+    else if (j==6) { # GARCH
+      model <- hanr_garch()
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
+    else if (j==7) { #Wavelet
+      model <- hanr_wavelet()
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
     # Metrics
     execution_time <- system.time({
       eval <- evaluate(har_eval_soft(sw_size=3), detection$event, dataset$Classe)   # SW = 3
     })
-    index <- ( (i-1)* 2 + j)  # AJUSTAR o 2 para 10 !!!!!!!!
-    print(index)
+    index <- ( (i-1)* n_methods + j)
     print(paste(index, " from i=", i, "and j=", j))
     for (name in names(eval)) {
       soft1[[name]][[index]] <- eval[[name]]
@@ -208,20 +231,56 @@ save(soft1, file = "michelFiles/soft1.RData")
 #  ------------------------------ END SOFT1 test --------------------------- #
 
 #  ------------------------------ SOFT2 test --------------------------- #
-for (i in 1:2) {
-  #Tests
-
-
-  # Metrics
-  execution_time <- system.time({
-    eval <- evaluate(har_eval_soft(sw_size=3), detection$event, dataset$Classe)
-  })
-  for (name in names(eval)) {
-    soft2[[name]][[i]] <- eval[[name]]
+for (i in 1:length(datasets)) {
+  for (j in 1:n_methods) {
+    #Tests
+    dataset <- datasets[[i]]
+    if (j==1) { # ARIMA
+      model <- hanr_arima()
+      model <- fit(model, dataset$serie)
+      detection <- detect(obj = model, dataset$serie)
+    }
+    else if (j==2) { # FBIAD
+      model <- hanr_fbiad()
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
+    else if (j==3) { #DTW
+      model <- hanct_dtw(3)
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
+    else if (j==4) { # K-means
+      model <- hanct_kmeans(3)
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
+    else if (j==5) { # FFT
+      model <- hanr_fft()
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
+    else if (j==6) { # GARCH
+      model <- hanr_garch()
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
+    else if (j==7) { #Wavelet
+      model <- hanr_wavelet()
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
+    # Metrics
+    execution_time <- system.time({
+      eval <- evaluate(har_eval_soft(sw_size=3), detection$event, dataset$Classe)   # SW = 3
+    })
+    index <- ( (i-1)* n_methods + j)
+    print(paste(index, " from i=", i, "and j=", j))
+    for (name in names(eval)) {
+      soft2[[name]][[index]] <- eval[[name]]
+    }
+    soft2[['time']][[index]] <- unname(execution_time['elapsed'])
   }
-  soft2[['time']][[i]] <- unname(execution_time['elapsed'])
 }
 
-# soft2 ARMAZENAR em .Rdata
-
-#  ------------------------------ END SOFT2 test --------------------------- #
+save(soft2, file = "michelFiles/soft2.RData")
