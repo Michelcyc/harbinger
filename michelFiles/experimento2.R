@@ -91,7 +91,7 @@ soft1 <- list(
 )
 
 # SOFT_2 #
-soft1 <- list(
+soft2 <- list(
   TP = vector("list", 100),
   FP = vector("list", 100),
   FN = vector("list", 100),
@@ -114,25 +114,40 @@ soft1 <- list(
 # Criar um for loop para cada. Ajustar 2 loops: loop de datasets e loop de detectores
 
 #  ------------------------------ HARD test --------------------------- #
-for (i in 1:2) {
-  #Tests
+for (i in 1:length(datasets)) {
+  for (j in 1:2) {
+    #Tests
+    dataset <- datasets[[i]]
+    if (j==1) { # ARIMA
+      model <- hanr_arima()
+      model <- fit(model, dataset$serie)
+      detection <- detect(obj = model, dataset$serie)
+    }
+    else if (j==2) { # FBIAD
+      model <- hanr_fbiad()
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
 
-
-  # Metrics
-  execution_time <- system.time({
-    eval <- evaluate(har_eval(), detection$event, dataset$Classe)
-  })
-  for (name in names(eval)) {
-    hard[[name]][[i]] <- eval[[name]]
+    # Metrics
+    execution_time <- system.time({
+      eval <- evaluate(har_eval(), detection$event, dataset$Classe)
+    })
+    index <- ( (i-1)* 2 + j)  # AJUSTAR o 2 para 10 !!!!!!!!
+    print(index)
+    print(paste(index, " from i=", i, "and j=", j))
+    for (name in names(eval)) {
+      hard[[name]][[index]] <- eval[[name]]
+    }
+    hard[['time']][[index]] <- unname(execution_time['elapsed'])
   }
-  hard[['time']][[i]] <- unname(execution_time['elapsed'])
 }
 
-# Check a specific attribute in 'hard'
-print(hard)
+# hard ARMAZENAR em .Rdata
+
 #  ------------------------------ END HARD test --------------------------- #
 
-#  ------------------------------ SOFT test --------------------------- #
+#  ------------------------------ SOFT1 test --------------------------- #
 for (i in 1:2) {
   #Tests
 
@@ -142,11 +157,30 @@ for (i in 1:2) {
     eval <- evaluate(har_eval_soft(sw_size=3), detection$event, dataset$Classe)
   })
   for (name in names(eval)) {
-    hard[[name]][[i]] <- eval[[name]]
+    soft1[[name]][[i]] <- eval[[name]]
   }
-  hard[['time']][[i]] <- unname(execution_time['elapsed'])
+  soft1[['time']][[i]] <- unname(execution_time['elapsed'])
 }
 
-# Check a specific attribute in 'hard'
-print(hard)
-#  ------------------------------ END SOFT test --------------------------- #
+# soft1 ARMAZENAR em .Rdata
+
+#  ------------------------------ END SOFT1 test --------------------------- #
+
+#  ------------------------------ SOFT2 test --------------------------- #
+for (i in 1:2) {
+  #Tests
+
+
+  # Metrics
+  execution_time <- system.time({
+    eval <- evaluate(har_eval_soft(sw_size=3), detection$event, dataset$Classe)
+  })
+  for (name in names(eval)) {
+    soft2[[name]][[i]] <- eval[[name]]
+  }
+  soft2[['time']][[i]] <- unname(execution_time['elapsed'])
+}
+
+# soft2 ARMAZENAR em .Rdata
+
+#  ------------------------------ END SOFT2 test --------------------------- #
