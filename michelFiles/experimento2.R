@@ -143,26 +143,41 @@ for (i in 1:length(datasets)) {
   }
 }
 
-# hard ARMAZENAR em .Rdata
+save(hard, file = "michelFiles/hard.RData")
 
 #  ------------------------------ END HARD test --------------------------- #
 
 #  ------------------------------ SOFT1 test --------------------------- #
-for (i in 1:2) {
-  #Tests
+for (i in 1:length(datasets)) {
+  for (j in 1:2) {
+    #Tests
+    dataset <- datasets[[i]]
+    if (j==1) { # ARIMA
+      model <- hanr_arima()
+      model <- fit(model, dataset$serie)
+      detection <- detect(obj = model, dataset$serie)
+    }
+    else if (j==2) { # FBIAD
+      model <- hanr_fbiad()
+      model <- fit(model, dataset$serie)
+      detection <- detect(model, dataset$serie)
+    }
 
-
-  # Metrics
-  execution_time <- system.time({
-    eval <- evaluate(har_eval_soft(sw_size=3), detection$event, dataset$Classe)
-  })
-  for (name in names(eval)) {
-    soft1[[name]][[i]] <- eval[[name]]
+    # Metrics
+    execution_time <- system.time({
+      eval <- evaluate(har_eval_soft(sw_size=3), detection$event, dataset$Classe)   # SW = 3
+    })
+    index <- ( (i-1)* 2 + j)  # AJUSTAR o 2 para 10 !!!!!!!!
+    print(index)
+    print(paste(index, " from i=", i, "and j=", j))
+    for (name in names(eval)) {
+      soft1[[name]][[index]] <- eval[[name]]
+    }
+    soft1[['time']][[index]] <- unname(execution_time['elapsed'])
   }
-  soft1[['time']][[i]] <- unname(execution_time['elapsed'])
 }
 
-# soft1 ARMAZENAR em .Rdata
+save(soft1, file = "michelFiles/.soft1.RData")
 
 #  ------------------------------ END SOFT1 test --------------------------- #
 
