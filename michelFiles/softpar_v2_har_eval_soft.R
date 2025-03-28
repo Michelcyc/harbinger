@@ -46,20 +46,10 @@ soft_scores <- function(detection, event, k){
   E <- which(event)
   m <- length(E)
 
-  # Array de segmentos de avaliação de eventos é criado
-  janela <- unlist(lapply(E, function(i) {
-    seq(max(1, i - k), min(m, i + k))
-  }))
-  event_aval <- rep(FALSE, m)
-  event_aval[janela] <- TRUE
-
-  # Opção 2 com data.table #
-  #dt <- data.table(idx = which(event))
-  #dt[, janela := .(.(seq(pmax(1L, idx - k), pmin(m, idx + k)))), by = idx]
-  #event_aval <- rep(FALSE, m)
-  #event_aval[unlist(dt$janela)] <- TRUE
+  # Falta transformar um array booleano em segmento
 
   # ----------------------------------------- #
+  S_d <- numeric(length(D)) #o vetor de scores que preciso retornar
   window_size_counter <- 0
   detections_counter <- 0
   interruptor <- 0
@@ -69,19 +59,22 @@ soft_scores <- function(detection, event, k){
       window_size_counter <- window_size_counter+1
     }
     else {
-      if (interruptor==1 && window_size_counter==2*k+1 && detections_counter > 0){
+      if (interruptor==1 && window_size_counter<=2*k+1 && detections_counter > 0){
         # Associar a detecção com maior score
         interruptor <- 0
         detections_counter <- 0
+        window_size_counter <- 0
       }
       else if (interruptor==1 && window_size_counter > 2*k+1 && detections_counter > 0){
         # Algoritmo hungaro
         interruptor <- 0
         detections_counter <- 0
+        window_size_counter <- 0
       }
       else if(interruptor==1){
         interruptor <- 0
         detections_counter <- 0
+        window_size_counter <- 0
       }
     }
     if (detection[idx]) {
