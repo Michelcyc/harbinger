@@ -118,26 +118,11 @@ soft_scores <- function(detection, event, k){
       cat("[FALSE TRUE] indice ", idx, "\n")
     }
   }
-  Avaliar
+  # Ok, agora tá literalmente tudo em ordem.
 
-  window_size_counter
-  detections_counter
-  # ------------------------------------------ #
-
-  sw_event_index <- 1 # Vou precisar em varrendo os indices de eventos e detecções até o fim
-  sw_detection_index <- 1
-  #S_d precisa ser um vetor com os scores de cada detecção (vetor S_d)
-  # ou seja, eu preciso ir preenchendo S_d com os scores
-  for (segment in segments) { # inicio em segment[1] e fim em segment[2]
-    if( (segment[2]-segment[1]) <= (2*k+1) ){
-      sw_event_index <- sw_event_index+1
-      print(sw_event_index)
-    }
-  }
-
-  for (j in E) { # j vai conter o índice onde ocorreu o evento
-    if (j>)
-  }
+  #Preciso criar um D_micro e um E_micro que vão fazer o mesmo que antes, só que micros
+  D_micro <-
+  E_micro <-
 
   #mu é a função que calcula os resultados das funções de pertencimento
   mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
