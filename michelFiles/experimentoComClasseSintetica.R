@@ -27,7 +27,7 @@ plot(grf)
 # Passando os dados
 event <- dataset$event
 detection <- fitted_detection_model$event
-k=2
+k=10
 # ----
 
 newSoftEval <- evaluate(har_eval_soft(sw_size=10), fitted_detection_model$event, dataset$event)

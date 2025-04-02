@@ -64,7 +64,6 @@ soft_scores <- function(detection, event, k){
 
     return(expanded)
   }
-
   event_aval <- expand_around_true(event, k)
 
   # ----------------------------------------- #
@@ -81,11 +80,16 @@ soft_scores <- function(detection, event, k){
     {
       if (window_size_counter<=2*k+1)
       {
-        cat("[TRUE FALSE] indice ", idx, "\n")
+        cat("Fim da janela de tamanho <= 2k+1 ", idx, "\n")
+      }
+      else if (window_size_counter>2*k+1)
+      {
+        cat("Fim da janela de tamanho > 2k+1 ", idx, "\n")
       }
       events_counter <- 0
       detections_counter <- 0
       window_size_counter <- 0
+      cat("[TRUE FALSE] indice ", idx, "\n")
     }
     else if (event_aval[idx] && event_aval[idx+1]) # [TRUE TRUE] Appends
     {
@@ -98,11 +102,20 @@ soft_scores <- function(detection, event, k){
         events_counter <- events_counter+1
         cat("Evento encontrado [TRUE TRUE] indice ", idx, "\n")
       }
-
+      cat("[TRUE TRUE] indice ", idx, "\n")
     }
     else if (!event_aval[idx] && !event_aval[idx+1]) # [FALSE FALSE] Check detections
     {
-      cat("Deteccao encontrada [FALSE FALSE] indice ", idx, "\n")
+      if (detection[idx])
+      {
+        detections_counter <- detections_counter+1
+        cat("Deteccao encontrada [FALSE FALSE] indice ", idx, "\n")
+      }
+      cat("[FALSE FALSE] indice ", idx, "\n")
+    }
+    else
+    {
+      cat("[FALSE TRUE] indice ", idx, "\n")
     }
   }
   Avaliar
