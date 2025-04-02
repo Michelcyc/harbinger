@@ -24,6 +24,11 @@ har_fitted_model <- fit(har_model, dataset$serie)
 fitted_detection_model <- detect(obj = har_fitted_model, dataset$serie)
 grf <- har_plot(har_fitted_model, dataset$serie, fitted_detection_model, dataset$event)
 plot(grf)
+# Passando os dados
+event <- dataset$event
+detection <- fitted_detection_model$event
+k=2
+# ----
 
 newSoftEval <- evaluate(har_eval_soft(sw_size=10), fitted_detection_model$event, dataset$event)
 printEval(newSoftEval)

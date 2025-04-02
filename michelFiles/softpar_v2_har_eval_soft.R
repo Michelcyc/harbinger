@@ -46,39 +46,87 @@ soft_scores <- function(detection, event, k){
   E <- which(event)
   m <- length(E)
 
-  # Falta transformar um array booleano em segmento
+  # Transformar um array booleano em segmento
+
+  expand_around_true <- function(detection, K) {
+    n <- length(detection)
+    true_indices <- which(detection)  # Encontra os índices onde detection == TRUE
+
+    # Cria um vetor lógico expandido
+    expanded <- logical(n)
+
+    for (i in true_indices) {
+      # Define os limites do intervalo a ser marcado como TRUE
+      start <- max(1, i - K)
+      end <- min(n, i + K)
+      expanded[start:end] <- TRUE
+    }
+
+    return(expanded)
+  }
+
+  event_aval <- expand_around_true(event, k)
 
   # ----------------------------------------- #
-  S_d <- numeric(length(D)) #o vetor de scores que preciso retornar
+  S_d <- numeric(n) #o vetor de scores que preciso retornar
+  S_d_counter <- 1
   window_size_counter <- 0
   detections_counter <- 0
-  interruptor <- 0
-  for (idx in seq_along(event_aval)) {
-    if (event_aval[idx]) {  # Se TRUE no indice
-      interruptor <- 1
+  events_counter <- 0
+  full_window <- length(event_aval)
+
+
+  for (idx in 1:(full_window - 1)) {
+    if (event_aval[idx] && !event_aval[idx+1]) # [TRUE FALSE] Avaliar
+    {
+      if (window_size_counter<=2*k+1)
+    }
+    else if (event_aval[idx] && event_aval[idx+1]) # [TRUE TRUE] Appends
+    {
+
+    }
+    else if (!event_aval[idx] && !event_aval[idx+1]) # [FALSE FALSE] Check detections
+    {
+
+    }
+
+    if (event_aval[idx] && !event_aval[idx+1]) {
+      interruptor <- 1 #dentro de uma janela avaliativa
       window_size_counter <- window_size_counter+1
+      if (detection[idx]) {
+        detections_counter <- detections_counter+1
+      }
+      else {
+
+      }
     }
     else {
-      if (interruptor==1 && window_size_counter<=2*k+1 && detections_counter > 0){
-        # Associar a detecção com maior score
-        interruptor <- 0
-        detections_counter <- 0
-        window_size_counter <- 0
+      #A avaliação SEMPRE ocorre aqui, porque é a hora que acaba a janela avaliativa
+      if ( (interruptor==1) && (window_size_counter==2*k+1) && (detections_counter > 0) ) {
+        # Associar a detecção com maior score #
+        S_d[S_d_counter] <- 10000
+        # ---------------------#
       }
       else if (interruptor==1 && window_size_counter > 2*k+1 && detections_counter > 0){
         # Algoritmo hungaro
-        interruptor <- 0
-        detections_counter <- 0
-        window_size_counter <- 0
+
+        # ---------------- #
       }
       else if(interruptor==1){
         interruptor <- 0
         detections_counter <- 0
         window_size_counter <- 0
       }
-    }
-    if (detection[idx]) {
-      detections_counter <- detections_counter+1
+
+      if (detection[idx]) {
+        #Nada a fazer porque já tá zerado
+      }
+      else {
+        #Nada a fazer
+      }
+      interruptor <- 0
+      window_size_counter <- 0
+      detections_counter <- 0
     }
   }
   window_size_counter
