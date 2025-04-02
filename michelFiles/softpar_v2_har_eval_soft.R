@@ -80,55 +80,33 @@ soft_scores <- function(detection, event, k){
     if (event_aval[idx] && !event_aval[idx+1]) # [TRUE FALSE] Avaliar
     {
       if (window_size_counter<=2*k+1)
+      {
+        cat("[TRUE FALSE] indice ", idx, "\n")
+      }
+      events_counter <- 0
+      detections_counter <- 0
+      window_size_counter <- 0
     }
     else if (event_aval[idx] && event_aval[idx+1]) # [TRUE TRUE] Appends
     {
+      window_size_counter <- window_size_counter+1
+      if (detection[idx]) {
+        detections_counter <- detections_counter+1
+        cat("Deteccao encontrada [TRUE TRUE] indice ", idx, "\n")
+      }
+      if (event[idx]) {
+        events_counter <- events_counter+1
+        cat("Evento encontrado [TRUE TRUE] indice ", idx, "\n")
+      }
 
     }
     else if (!event_aval[idx] && !event_aval[idx+1]) # [FALSE FALSE] Check detections
     {
-
-    }
-
-    if (event_aval[idx] && !event_aval[idx+1]) {
-      interruptor <- 1 #dentro de uma janela avaliativa
-      window_size_counter <- window_size_counter+1
-      if (detection[idx]) {
-        detections_counter <- detections_counter+1
-      }
-      else {
-
-      }
-    }
-    else {
-      #A avaliação SEMPRE ocorre aqui, porque é a hora que acaba a janela avaliativa
-      if ( (interruptor==1) && (window_size_counter==2*k+1) && (detections_counter > 0) ) {
-        # Associar a detecção com maior score #
-        S_d[S_d_counter] <- 10000
-        # ---------------------#
-      }
-      else if (interruptor==1 && window_size_counter > 2*k+1 && detections_counter > 0){
-        # Algoritmo hungaro
-
-        # ---------------- #
-      }
-      else if(interruptor==1){
-        interruptor <- 0
-        detections_counter <- 0
-        window_size_counter <- 0
-      }
-
-      if (detection[idx]) {
-        #Nada a fazer porque já tá zerado
-      }
-      else {
-        #Nada a fazer
-      }
-      interruptor <- 0
-      window_size_counter <- 0
-      detections_counter <- 0
+      cat("Deteccao encontrada [FALSE FALSE] indice ", idx, "\n")
     }
   }
+  Avaliar
+
   window_size_counter
   detections_counter
   # ------------------------------------------ #
