@@ -48,7 +48,6 @@ soft_scores <- function(detection, event, k){
 
   # Cria os segmentos iniciais e ordena-os
   segments <- t(sapply(E, function(x) c(inf = x - k, sup = x + k)))
-  segments <- segments[order(segments[,"inf"]),]
   cat("Segmentos iniciais:\n")
   print(segments)
 
@@ -66,7 +65,7 @@ soft_scores <- function(detection, event, k){
       }
     }
     merged[[length(merged) + 1]] <- current
-    merged_matrix <- do.call(rbind, merged)
+    merged_matrix <- do.call(rbind, merged)  #checar se realmente é necessário
     return(merged_matrix)
   }
 
@@ -87,48 +86,54 @@ soft_scores <- function(detection, event, k){
   cat("\nGrupos de vetores para cada segmento mesclado:\n")
   print(grupos)
 
-  # Identifica os pontos de D que não caem em nenhum dos segmentos mesclados
-  outside_D <- D[ !sapply(D, function(d) {
-    any(sapply(1:nrow(merged_segments), function(i) {
-      d >= merged_segments[i, "inf"] && d <= merged_segments[i, "sup"]
-    }))
-  })]
+  # Hora de dar os scores
+  S_d <- rep(0, length(D))
+  S_d_counter <- 1
+  mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
+  mu_simples <- function(d,e,k) max(min( (d-(e-k))/k, ((e+k)-d)/k ), 0)
 
-  cat("\nPontos de D que não estão em nenhum segmento:\n")
-  print(outside_D)
+  for (idx in seq_along(grupos)) {
+    D_mini <- grupos[[idx]]$D_mini
+    E_mini <- grupos[[idx]]$E_mini
+
+    n <- length(D_mini)
+    m <- length(E_mini)
+
+    # if n=0 nada a fazer
+    # if m=0 nunca ocorrerá
+    if (n==1 && m==1) #Associação direta
+    {
+      S_d[S_d_counter] <- mu_simples(D_mini[1],E_mini[1],k)
+      S_d_counter <- S_d_counter+1
+    }
+    else if (n >= 1 && m >= 1) # contempla n=1 m>1, n>1 m=1, n>1 m>1
+    {
+      Mu <- matrix(NA, nrow = n, ncol = m)
+      for (j in 1:m) {
+        for (i in 1:n) {
+          Mu[i, j] <- mu(j, i, E_mini, D_mini, k)
+          associationMatrix <- HungarianSolver(-1*Mu);
+          scores <- Mu[associationMatrix$pairs]
+        }
+      }
+    }
+  }
+
+
 
   # ------------------------------ END ------------------------- #
 
-  #mu é a função que calcula os resultados das funções de pertencimento
-  mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
-
-  #aqui é necessário que crie uma matrix Mu para cada caso conflituoso separadamente
-  Mu <- matrix(NA,nrow = n, ncol = m)
-  for(j in 1:m) for(i in 1:n) Mu[i,j] <- mu(j,i,E,D,k)
-
-  E_d <- list()
-  for(i in 1:n) E_d[[i]] <- which(Mu[i,] == max(Mu[i,]))
-
-  D_e <- list()
-  for(j in 1:m) D_e[[j]] <- which(sapply(1:n, function(i) j %in% E_d[[i]] & Mu[i,j] > 0))
-
-  d_e <- c()
-  for(j in 1:m) {
-    if(length(D_e[[j]])==0) d_e[j] <- NA
-    else d_e[j] <- D_e[[j]][which.max(sapply(D_e[[j]], function(i) Mu[i,j]))]
-  }
-
-  S_e <- c()
-  for(j in 1:m) {
-    if(length(D_e[[j]])==0) S_e[j] <- NA
-    #else S_e[j] <- sum(sapply(D_e[[j]], function(i) Mu[i,j])) / length(D_e[[j]]) #mean
-    else S_e[j] <- max(sapply(D_e[[j]], function(i) Mu[i,j]))  #max
-  }
-
-  S_d <- c()
-  for(i in 1:n) S_d[i] <- max(S_e[which(d_e == i)], 0)
-
   return(S_d)
+  # Acho que é desnecessário se eu inicializar S_d com zeros
+  # # Identifica os pontos de D que não caem em nenhum dos segmentos mesclados
+  # outside_D <- D[ !sapply(D, function(d) {
+  #   any(sapply(1:nrow(merged_segments), function(i) {
+  #     d >= merged_segments[i, "inf"] && d <= merged_segments[i, "sup"]
+  #   }))
+  # })]
+  #
+  # cat("\nPontos de D que não estão em nenhum segmento:\n")
+  # print(outside_D)
 }
 
 #'@importFrom daltoolbox evaluate
