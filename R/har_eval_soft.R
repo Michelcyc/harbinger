@@ -70,22 +70,14 @@ soft_scores <- function(detection, event, k){
   merged_segments <- merge_intervals(segments)
 
   # Para cada segmento mesclado, cria um grupo com 2 vetores: D_mini e E_mini
-  # grupos <- lapply(1:nrow(merged_segments), function(i) {
-  #   seg <- merged_segments[i, ]
-  #
-  #   D_mini <- D[D >= seg["inf"] & D <= seg["sup"]]
-  #   E_mini <- E[E >= seg["inf"] & E <= seg["sup"]]
-  #
-  #   list(D_mini = D_mini, E_mini = E_mini)
-  # })
-  grupos <- vector("list", nrow(merged_segments))
-  for (i in seq_len(nrow(merged_segments))) {
+  grupos <- lapply(1:nrow(merged_segments), function(i) {
     seg <- merged_segments[i, ]
-    grupos[[i]] <- list(
-      D_mini = D[D >= seg["inf"] & D <= seg["sup"]],
-      E_mini = E[E >= seg["inf"] & E <= seg["sup"]]
-    )
-  }
+
+    D_mini <- D[D >= seg["inf"] & D <= seg["sup"]]
+    E_mini <- E[E >= seg["inf"] & E <= seg["sup"]]
+
+    list(D_mini = D_mini, E_mini = E_mini)
+  })
 
   # Hora de dar os scores
   S_d <- rep(0, length(D))
