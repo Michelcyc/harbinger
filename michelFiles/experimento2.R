@@ -73,7 +73,7 @@ soft2 <- list(
   time = vector("list", 70)
 )
 
-set.seed(42)
+set.seed(7)
 
 n_methods <- 7
 
