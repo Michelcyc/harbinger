@@ -17,6 +17,8 @@ dataset[51,1] <- 0.8
 dataset[51,2] <- TRUE
 dataset[54,1] <- 0.2
 dataset[54,2] <- TRUE
+dataset[57,1] <- 1.0
+dataset[57,2] <- TRUE
 dataset[90,2] <- TRUE
 
 indexDaSerie <- 1:length(dataset$serie)
@@ -30,7 +32,7 @@ plot(grf)
 # Passando os dados
 event <- dataset$event
 detection <- fitted_detection_model$event
-k=2
+k=3
 # ----
 
 newSoftEval <- evaluate(har_eval_soft(sw_size=10), fitted_detection_model$event, dataset$event)

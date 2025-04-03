@@ -121,16 +121,6 @@ soft_scores <- function(detection, event, k){
     }
   }
   return(S_d)
-  # Acho que é desnecessário se eu inicializar S_d com zeros
-  # # Identifica os pontos de D que não caem em nenhum dos segmentos mesclados
-  # outside_D <- D[ !sapply(D, function(d) {
-  #   any(sapply(1:nrow(merged_segments), function(i) {
-  #     d >= merged_segments[i, "inf"] && d <= merged_segments[i, "sup"]
-  #   }))
-  # })]
-  #
-  # cat("\nPontos de D que não estão em nenhum segmento:\n")
-  # print(outside_D)
 }
 
 #'@importFrom daltoolbox evaluate
