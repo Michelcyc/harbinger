@@ -107,6 +107,14 @@ soft_scores <- function(detection, event, k){
           Mu[i, j] <- mu(j, i, E_mini, D_mini, k)
         }
       }
+      # Checando
+      if (any(is.na(Mu) | is.nan(Mu) | is.infinite(Mu))) {
+        stop("Error: Mu contains NA, NaN, or infinite values")
+      }
+      if (nrow(Mu) == 0 || ncol(Mu) == 0) {
+        stop("Error: Mu is empty, HungarianSolver cannot proceed")
+      }
+      # Checando
       associationMatrix <- HungarianSolver(-1*Mu);
       scores <- Mu[associationMatrix$pairs]
       S_d[S_d_counter:(S_d_counter + length(scores) - 1)] <- scores
