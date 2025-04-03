@@ -244,5 +244,11 @@ for (i in 1:length(datasets)) {
     soft2[['time']][[index]] <- unname(execution_time['elapsed'])
   }
 }
-# mean(unlist(soft2$time))
+
 save(soft2, file = "michelFiles/soft2.RData")
+
+mean(unlist(soft2$time))
+mean(unlist(soft2$accuracy))
+mean(unlist(soft2$sensitivity))
+mean(unlist(soft2$specificity))
+mean(unlist(soft2$prevalence))

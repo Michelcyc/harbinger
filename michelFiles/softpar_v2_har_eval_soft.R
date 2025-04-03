@@ -47,7 +47,7 @@ soft_scores <- function(detection, event, k){
   m <- length(E)
 
   # Cria os segmentos iniciais e ordena-os
-  segments <- t(sapply(E, function(x) c(inf = x - k, sup = x + k)))
+  segments <- t(vapply(E, function(x) c(inf = x - k, sup = x + k), numeric(2)))
   cat("Segmentos iniciais:\n")
   print(segments)
 
