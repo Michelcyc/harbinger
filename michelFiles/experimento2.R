@@ -73,6 +73,8 @@ soft2 <- list(
   time = vector("list", 70)
 )
 
+set.seed(42)
+
 n_methods <- 7
 
 # Criar um for loop para cada. Ajustar 2 loops: loop de datasets e loop de detectores
