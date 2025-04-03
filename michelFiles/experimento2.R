@@ -254,3 +254,4 @@ mean(unlist(soft2$accuracy))
 mean(unlist(soft2$sensitivity))
 mean(unlist(soft2$specificity))
 mean(unlist(soft2$prevalence))
+
