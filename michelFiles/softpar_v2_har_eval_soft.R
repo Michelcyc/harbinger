@@ -46,83 +46,48 @@ soft_scores <- function(detection, event, k){
   E <- which(event)
   m <- length(E)
 
-  # Transformar um array booleano em segmento
+  # Cria os segmentos iniciais e ordena-os
+  segments <- t(sapply(E, function(x) c(inf = x - k, sup = x + k)))
+  segments <- segments[order(segments[,"inf"]),]
+  cat("Segmentos iniciais:\n")
+  print(segments)
 
-  expand_around_true <- function(detection, K) {
-    n <- length(detection)
-    true_indices <- which(detection)  # Encontra os índices onde detection == TRUE
-
-    # Cria um vetor lógico expandido
-    expanded <- logical(n)
-
-    for (i in true_indices) {
-      # Define os limites do intervalo a ser marcado como TRUE
-      start <- max(1, i - K)
-      end <- min(n, i + K)
-      expanded[start:end] <- TRUE
+  # Função para mesclar intervalos sobrepostos
+  merge_intervals <- function(intervals) {
+    merged <- list()
+    current <- intervals[1, ]
+    for (i in 2:nrow(intervals)) {
+      interval <- intervals[i, ]
+      if (interval["inf"] <= current["sup"]) {
+        current["sup"] <- max(current["sup"], interval["sup"])
+      } else {
+        merged[[length(merged) + 1]] <- current
+        current <- interval
+      }
     }
-
-    return(expanded)
+    merged[[length(merged) + 1]] <- current
+    merged_matrix <- do.call(rbind, merged)
+    return(merged_matrix)
   }
-  event_aval <- expand_around_true(event, k)
 
-  # ----------------------------------------- #
-  S_d <- numeric(n) #o vetor de scores que preciso retornar
-  S_d_counter <- 1
-  window_size_counter <- 0
-  detections_counter <- 0
-  events_counter <- 0
-  full_window <- length(event_aval)
+  merged_segments <- merge_intervals(segments)
+  cat("\nSegmentos mesclados:\n")
+  print(merged_segments)
 
+  # Para cada segmento mesclado, cria um grupo com 2 vetores: D_mini e E_mini
+  grupos <- lapply(1:nrow(merged_segments), function(i) {
+    seg <- merged_segments[i, ]
 
-  for (idx in 1:(full_window - 1)) {
-    if (event_aval[idx] && !event_aval[idx+1]) # [TRUE FALSE] Avaliar
-    {
-      if (window_size_counter<=2*k+1)
-      {
-        cat("Fim da janela de tamanho <= 2k+1 ", idx, "\n")
-      }
-      else if (window_size_counter>2*k+1)
-      {
-        cat("Fim da janela de tamanho > 2k+1 ", idx, "\n")
-      }
-      events_counter <- 0
-      detections_counter <- 0
-      window_size_counter <- 0
-      cat("[TRUE FALSE] indice ", idx, "\n")
-    }
-    else if (event_aval[idx] && event_aval[idx+1]) # [TRUE TRUE] Appends
-    {
-      window_size_counter <- window_size_counter+1
-      if (detection[idx]) {
-        detections_counter <- detections_counter+1
-        cat("Deteccao encontrada [TRUE TRUE] indice ", idx, "\n")
-      }
-      if (event[idx]) {
-        events_counter <- events_counter+1
-        cat("Evento encontrado [TRUE TRUE] indice ", idx, "\n")
-      }
-      cat("[TRUE TRUE] indice ", idx, "\n")
-    }
-    else if (!event_aval[idx] && !event_aval[idx+1]) # [FALSE FALSE] Check detections
-    {
-      if (detection[idx])
-      {
-        detections_counter <- detections_counter+1
-        cat("Deteccao encontrada [FALSE FALSE] indice ", idx, "\n")
-      }
-      cat("[FALSE FALSE] indice ", idx, "\n")
-    }
-    else
-    {
-      cat("[FALSE TRUE] indice ", idx, "\n")
-    }
-  }
-  # Ok, agora tá literalmente tudo em ordem.
+    D_mini <- D[D >= seg["inf"] & D <= seg["sup"]]
+    E_mini <- E[E >= seg["inf"] & E <= seg["sup"]]
 
-  #Preciso criar um D_micro e um E_micro que vão fazer o mesmo que antes, só que micros
-  D_micro <-
-  E_micro <-
+    list(D_mini = D_mini, E_mini = E_mini)
+  })
+
+  cat("\nGrupos de vetores para cada segmento mesclado:\n")
+  print(grupos)
+
+  # ------------------------------ END ------------------------- #
 
   #mu é a função que calcula os resultados das funções de pertencimento
   mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)

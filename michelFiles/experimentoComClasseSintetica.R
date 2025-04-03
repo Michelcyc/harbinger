@@ -11,10 +11,13 @@ library(RcppHungarian)
 data("har_examples")
 
 dataset <- har_examples[[2]]
+dataset[30,1] <- 0.1
+dataset[30,2] <- TRUE
 dataset[51,1] <- 0.8
 dataset[51,2] <- TRUE
 dataset[54,1] <- 0.2
 dataset[54,2] <- TRUE
+dataset[90,2] <- TRUE
 
 indexDaSerie <- 1:length(dataset$serie)
 plot_ts(x=indexDaSerie, y=dataset$serie)
