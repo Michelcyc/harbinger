@@ -107,6 +107,27 @@ soft_scores <- function(detection, event, k){
       S_d_counter <- S_d_counter+1
     }
     else if (n >= 1 && m >= 1) # contempla n=1 m>1, n>1 m=1, n>1 m>1
+    {# Hora de dar os scores
+  S_d <- rep(0, length(D))
+  S_d_counter <- 1
+  mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
+  mu_simples <- function(d,e,k) max(min( (d-(e-k))/k, ((e+k)-d)/k ), 0)
+
+  for (idx in seq_along(grupos)) {
+    D_mini <- grupos[[idx]]$D_mini
+    E_mini <- grupos[[idx]]$E_mini
+
+    n <- length(D_mini)
+    m <- length(E_mini)
+
+    # if n=0 nada a fazer
+    # if m=0 nunca ocorrerá
+    if (n==1 && m==1) #Associação direta
+    {
+      S_d[S_d_counter] <- mu_simples(D_mini[1],E_mini[1],k)
+      S_d_counter <- S_d_counter+1
+    }
+    else if (n >= 1 && m >= 1) # contempla n=1 m>1, n>1 m=1, n>1 m>1
     {
       Mu <- matrix(NA, nrow = n, ncol = m)
       for (j in 1:m) {
@@ -114,14 +135,24 @@ soft_scores <- function(detection, event, k){
           Mu[i, j] <- mu(j, i, E_mini, D_mini, k)
           associationMatrix <- HungarianSolver(-1*Mu);
           scores <- Mu[associationMatrix$pairs]
+          S_d[S_d_counter:(S_d_counter + length(scores) - 1)] <- scores
+          S_d_counter <- S_d_counter + length(scores)
         }
       }
     }
   }
-
-
-
-  # ------------------------------ END ------------------------- #
+      Mu <- matrix(NA, nrow = n, ncol = m)
+      for (j in 1:m) {
+        for (i in 1:n) {
+          Mu[i, j] <- mu(j, i, E_mini, D_mini, k)
+          associationMatrix <- HungarianSolver(-1*Mu);
+          scores <- Mu[associationMatrix$pairs]
+          S_d[S_d_counter:(S_d_counter + length(scores) - 1)] <- scores
+          S_d_counter <- S_d_counter + length(scores)
+        }
+      }
+    }
+  }
 
   return(S_d)
   # Acho que é desnecessário se eu inicializar S_d com zeros
