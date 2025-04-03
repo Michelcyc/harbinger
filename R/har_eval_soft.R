@@ -50,21 +50,37 @@ soft_scores <- function(detection, event, k){
   segments <- t(vapply(E, function(x) c(inf = x - k, sup = x + k), numeric(2)))
 
   # Função para mesclar intervalos sobrepostos
+  # merge_intervals <- function(intervals) {
+  #   merged <- list()
+  #   current <- intervals[1, ]
+  #   for (i in 2:nrow(intervals)) {
+  #     interval <- intervals[i, ]
+  #     if (interval["inf"] <= current["sup"]) {
+  #       current["sup"] <- max(current["sup"], interval["sup"])
+  #     } else {
+  #       merged[[length(merged) + 1]] <- current
+  #       current <- interval
+  #     }
+  #   }
+  #   merged[[length(merged) + 1]] <- current
+  #   merged_matrix <- do.call(rbind, merged)  #checar se realmente é necessário
+  #   return(merged_matrix)
+  # }
+  #
+  # merged_segments <- merge_intervals(segments)
+
   merge_intervals <- function(intervals) {
-    merged <- list()
-    current <- intervals[1, ]
-    for (i in 2:nrow(intervals)) {
-      interval <- intervals[i, ]
-      if (interval["inf"] <= current["sup"]) {
-        current["sup"] <- max(current["sup"], interval["sup"])
+    if (nrow(intervals) == 1) return(intervals)
+    sorted_intervals <- intervals[order(intervals[, "inf"]), ]
+    Reduce(function(acc, interval) {
+      last <- acc[nrow(acc), ]
+      if (interval["inf"] <= last["sup"]) {
+        acc[nrow(acc), "sup"] <- max(last["sup"], interval["sup"])
+        acc
       } else {
-        merged[[length(merged) + 1]] <- current
-        current <- interval
+        rbind(acc, interval)
       }
-    }
-    merged[[length(merged) + 1]] <- current
-    merged_matrix <- do.call(rbind, merged)  #checar se realmente é necessário
-    return(merged_matrix)
+    }, as.data.frame(sorted_intervals), init = as.data.frame(sorted_intervals[1, , drop = FALSE]))
   }
 
   merged_segments <- merge_intervals(segments)
