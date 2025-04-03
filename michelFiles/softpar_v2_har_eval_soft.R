@@ -87,6 +87,16 @@ soft_scores <- function(detection, event, k){
   cat("\nGrupos de vetores para cada segmento mesclado:\n")
   print(grupos)
 
+  # Identifica os pontos de D que não caem em nenhum dos segmentos mesclados
+  outside_D <- D[ !sapply(D, function(d) {
+    any(sapply(1:nrow(merged_segments), function(i) {
+      d >= merged_segments[i, "inf"] && d <= merged_segments[i, "sup"]
+    }))
+  })]
+
+  cat("\nPontos de D que não estão em nenhum segmento:\n")
+  print(outside_D)
+
   # ------------------------------ END ------------------------- #
 
   #mu é a função que calcula os resultados das funções de pertencimento
