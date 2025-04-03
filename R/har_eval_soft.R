@@ -50,50 +50,42 @@ soft_scores <- function(detection, event, k){
   segments <- t(vapply(E, function(x) c(inf = x - k, sup = x + k), numeric(2)))
 
   # Função para mesclar intervalos sobrepostos
-  # merge_intervals <- function(intervals) {
-  #   merged <- list()
-  #   current <- intervals[1, ]
-  #   for (i in 2:nrow(intervals)) {
-  #     interval <- intervals[i, ]
-  #     if (interval["inf"] <= current["sup"]) {
-  #       current["sup"] <- max(current["sup"], interval["sup"])
-  #     } else {
-  #       merged[[length(merged) + 1]] <- current
-  #       current <- interval
-  #     }
-  #   }
-  #   merged[[length(merged) + 1]] <- current
-  #   merged_matrix <- do.call(rbind, merged)  #checar se realmente é necessário
-  #   return(merged_matrix)
-  # }
-  #
-  # merged_segments <- merge_intervals(segments)
-
   merge_intervals <- function(intervals) {
-    if (nrow(intervals) == 1) return(intervals)
-    sorted_intervals <- intervals[order(intervals[, "inf"]), ]
-    Reduce(function(acc, interval) {
-      last <- acc[nrow(acc), ]
-      if (interval["inf"] <= last["sup"]) {
-        acc[nrow(acc), "sup"] <- max(last["sup"], interval["sup"])
-        acc
+    merged <- list()
+    current <- intervals[1, ]
+    for (i in 2:nrow(intervals)) {
+      interval <- intervals[i, ]
+      if (interval["inf"] <= current["sup"]) {
+        current["sup"] <- max(current["sup"], interval["sup"])
       } else {
-        rbind(acc, interval)
+        merged[[length(merged) + 1]] <- current
+        current <- interval
       }
-    }, as.data.frame(sorted_intervals), init = as.data.frame(sorted_intervals[1, , drop = FALSE]))
+    }
+    merged[[length(merged) + 1]] <- current
+    merged_matrix <- do.call(rbind, merged)  #checar se realmente é necessário
+    return(merged_matrix)
   }
 
   merged_segments <- merge_intervals(segments)
 
   # Para cada segmento mesclado, cria um grupo com 2 vetores: D_mini e E_mini
-  grupos <- lapply(1:nrow(merged_segments), function(i) {
+  # grupos <- lapply(1:nrow(merged_segments), function(i) {
+  #   seg <- merged_segments[i, ]
+  #
+  #   D_mini <- D[D >= seg["inf"] & D <= seg["sup"]]
+  #   E_mini <- E[E >= seg["inf"] & E <= seg["sup"]]
+  #
+  #   list(D_mini = D_mini, E_mini = E_mini)
+  # })
+  grupos <- vector("list", nrow(merged_segments))
+  for (i in seq_len(nrow(merged_segments))) {
     seg <- merged_segments[i, ]
-
-    D_mini <- D[D >= seg["inf"] & D <= seg["sup"]]
-    E_mini <- E[E >= seg["inf"] & E <= seg["sup"]]
-
-    list(D_mini = D_mini, E_mini = E_mini)
-  })
+    grupos[[i]] <- list(
+      D_mini = D[D >= seg["inf"] & D <= seg["sup"]],
+      E_mini = E[E >= seg["inf"] & E <= seg["sup"]]
+    )
+  }
 
   # Hora de dar os scores
   S_d <- rep(0, length(D))
