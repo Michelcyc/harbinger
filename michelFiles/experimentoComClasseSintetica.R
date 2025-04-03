@@ -1,12 +1,16 @@
 remove.packages("harbinger")
 quit(save = "no")
-library("daltoolbox")
+
 devtools::install_github("Michelcyc/harbinger", force=TRUE, upgrade="never")
-library("harbinger")
-source("michelFiles/my_utils.R")
 
 install.packages('RcppHungarian')
 library(RcppHungarian)
+
+library("daltoolbox")
+library("harbinger")
+source("michelFiles/my_utils.R")
+
+
 
 data("har_examples")
 
