@@ -21,7 +21,7 @@ results2 <- matrix(NA, nrow = nrow(dataset1), ncol = nrow(dataset2))
 for (i in seq_len(nrow(dataset1))) {
   for (j in seq_len(nrow(dataset2))) {
     eval1 <- evaluate(
-      har_eval_soft(2),                      # Configuração de avaliação
+      har_eval_soft(3),                      # Configuração de avaliação
       #har_eval(),
       unlist(dataset1[i, ]),
       unlist(dataset2[j, ])
@@ -95,3 +95,4 @@ ggplot(df_diff, aes(x = "", y = Difference)) +
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 14)
   )
+
