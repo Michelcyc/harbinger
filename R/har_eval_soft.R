@@ -119,6 +119,7 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
         S_d_counter <- S_d_counter + length(scores)
       }
     }
+    S_d <- S_d / k
     return(S_d)
   }
 
