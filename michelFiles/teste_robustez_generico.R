@@ -21,16 +21,17 @@ results2 <- matrix(NA, nrow = nrow(dataset1), ncol = nrow(dataset2))
 for (i in seq_len(nrow(dataset1))) {
   for (j in seq_len(nrow(dataset2))) {
     eval1 <- evaluate(
-      har_eval_soft(1),                      # Configuração de avaliação
-      unlist(dataset1[i, ]),                 # Vetor lógico de detecção
-      unlist(dataset2[j, ])                  # Vetor lógico da classe real
+      har_eval_soft(2),                      # Configuração de avaliação
+      #har_eval(),
+      unlist(dataset1[i, ]),
+      unlist(dataset2[j, ])
     )
-    results1[i, j] <- eval1$F1                 # Armazena o F1-score
+    results1[i, j] <- eval1$accuracy
 
     eval2 <- evaluate(
-      har_eval(),                      # Configuração de avaliação
-      unlist(dataset1[i, ]),                 # Vetor lógico de detecção
-      unlist(dataset2[j, ])                  # Vetor lógico da classe real
+      har_eval(),
+      unlist(dataset1[i, ]),
+      unlist(dataset2[j, ])
     )
     results2[i, j] <- eval2$accuracy
   }
