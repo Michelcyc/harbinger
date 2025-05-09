@@ -133,10 +133,10 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   m <- length(which(event))
   t <- length(event)
 
-  ajuste <- sqrt(sqrt(obj$sw_size))
+  ajuste <- ( (obj$sw_size-1)( (3*t)-(obj$sw_size+1) ) ) / 3
   TPs <- sum(scores)/ajuste
   FPs <- sum(1-scores)*ajuste
-  FNs <- (m/ajuste) - TPs
+  FNs <- m - TPs
   TNs <- (t-m)-FPs
 
   #TPs <- sum(scores)
