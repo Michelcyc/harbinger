@@ -21,19 +21,19 @@ results2 <- matrix(NA, nrow = nrow(dataset1), ncol = nrow(dataset2))
 for (i in seq_len(nrow(dataset1))) {
   for (j in seq_len(nrow(dataset2))) {
     eval1 <- evaluate(
-      har_eval_soft(2),                      # Configuração de avaliação
+      har_eval_soft(3),                      # Configuração de avaliação
       #har_eval(),
       unlist(dataset1[i, ]),
       unlist(dataset2[j, ])
     )
-    results1[i, j] <- eval1$tp_rate
+    results1[i, j] <- eval1$tn_rate
 
     eval2 <- evaluate(
       har_eval(),
       unlist(dataset1[i, ]),
       unlist(dataset2[j, ])
     )
-    results2[i, j] <- eval2$tp_rate
+    results2[i, j] <- eval2$tn_rate
   }
 }
 
