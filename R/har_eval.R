@@ -51,10 +51,10 @@ evaluate.har_eval <- function(obj, detection, event, ...) {
                                   round(FN,2),round(TN,2)), nrow = 3, ncol = 2, byrow = TRUE,
                                 dimnames = list(c("detection", "TRUE","FALSE"),
                                                 c("event", ""))))
-  tp_rate <- TPs/(TPs+FPs+FNs+TNs)
-  fp_rate <- FPs/(TPs+FPs+FNs+TNs)
-  fn_rate <- FNs/(TPs+FPs+FNs+TNs)
-  tn_rate <- TNs/(TPs+FPs+FNs+TNs)
+  tp_rate <- TP/(TP+FP+FN+TN)
+  fp_rate <- FP/(TP+FP+FN+TN)
+  fn_rate <- FN/(TP+FP+FN+TN)
+  tn_rate <- TN/(TP+FP+FN+TN)
   accuracy <- (TP+TN)/(TP+FP+FN+TN)
   sensitivity <- TP/(TP+FN)
   specificity <- TN/(FP+TN)
