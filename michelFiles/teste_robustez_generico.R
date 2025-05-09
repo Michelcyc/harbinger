@@ -10,14 +10,14 @@ library("daltoolbox")
 library("harbinger")
 
 # Gerar todos os vetores possíveis de 7 valores lógicos (TRUE/FALSE)
-dataset1 <- expand.grid(replicate(7, c(TRUE, FALSE), simplify = FALSE))
-dataset2 <- expand.grid(replicate(7, c(TRUE, FALSE), simplify = FALSE))
+dataset1 <- expand.grid(replicate(9, c(TRUE, FALSE), simplify = FALSE))
+dataset2 <- expand.grid(replicate(9, c(TRUE, FALSE), simplify = FALSE))
 
 # Inicializar matriz para armazenar F1-scores
 results1 <- matrix(NA, nrow = nrow(dataset1), ncol = nrow(dataset2))
 results2 <- matrix(NA, nrow = nrow(dataset1), ncol = nrow(dataset2))
 
-k=3
+k=4
 k_message <- sprintf("K = %s", k)
 
 # Loop de avaliação: comparar cada linha de dataset1 com cada linha de dataset2
