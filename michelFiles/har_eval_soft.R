@@ -119,7 +119,6 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
         S_d_counter <- S_d_counter + length(scores)
       }
     }
-    S_d <- S_d / sqrt(k)
     return(S_d)
   }
 
@@ -134,8 +133,8 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   m <- length(which(event))
   t <- length(event)
 
-  TPs <- sum(scores)
-  FPs <- sum(1-scores)
+  TPs <- sum(scores)/obj$sw_size
+  FPs <- sum(1-scores)/obj$sw_size
   FNs <- m-TPs
   TNs <- (t-m)-FPs
 
