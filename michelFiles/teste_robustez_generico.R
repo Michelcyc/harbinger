@@ -17,23 +17,26 @@ dataset2 <- expand.grid(replicate(7, c(TRUE, FALSE), simplify = FALSE))
 results1 <- matrix(NA, nrow = nrow(dataset1), ncol = nrow(dataset2))
 results2 <- matrix(NA, nrow = nrow(dataset1), ncol = nrow(dataset2))
 
+k=1
+k_message <- sprintf("K = %s", k)
+
 # Loop de avaliação: comparar cada linha de dataset1 com cada linha de dataset2
 for (i in seq_len(nrow(dataset1))) {
   for (j in seq_len(nrow(dataset2))) {
     eval1 <- evaluate(
-      har_eval_soft(3),                      # Configuração de avaliação
+      har_eval_soft(k),                      # Configuração de avaliação
       #har_eval(),
       unlist(dataset1[i, ]),
       unlist(dataset2[j, ])
     )
-    results1[i, j] <- eval1$tp_rate
+    results1[i, j] <- eval1$accuracy
 
     eval2 <- evaluate(
       har_eval(),
       unlist(dataset1[i, ]),
       unlist(dataset2[j, ])
     )
-    results2[i, j] <- eval2$tp_rate
+    results2[i, j] <- eval2$accuracy
   }
 }
 
@@ -54,11 +57,12 @@ df <- tibble(
 df <- df %>% filter(!is.na(F1))
 
 # Criar o boxplot
+
 ggplot(df, aes(x = Method, y = F1, fill = Method)) +
   geom_boxplot() +
-  labs(title = "Distribuição dos F1-scores",
-       x = "Método de Avaliação",
-       y = "F1-score") +
+  labs(title = "Distribuição dos valores da métrica" + k_message,
+       x = "",
+       y = "") +
   theme_minimal() +
   scale_fill_brewer(palette = "Pastel1") +
   theme(
@@ -86,9 +90,9 @@ ggplot(df_diff, aes(x = "", y = Difference)) +
   geom_boxplot(fill = "lightblue", color = "darkblue") +
   geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
   labs(
-    title = "Diferença ponto a ponto entre Soft e Hard (F1-score)",
+    title = "Diferença ponto a ponto entre as métricas" + k_message,
     x = "",
-    y = "F1_soft - F1_hard"
+    y = ""
   ) +
   theme_minimal() +
   theme(
