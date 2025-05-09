@@ -1,3 +1,5 @@
+library(readr)
+
 dataset <- read_csv('michelFiles/futuros_ibov_2019.csv')
 names(dataset)[names(dataset) == "PreprocessedSeries"] <- "serie"
 ibov <- head(dataset, 20000)
@@ -31,3 +33,4 @@ uk100 <- head(dataset, 20000)
 
 datasets <- list(ibov = ibov, aus200 = aus200, de30 = de30, dj = dj, esp35 = esp35,
                  hk50 = hk50, jp225 = jp225, nas = nas, sp500 = sp500, uk100 = uk100)
+
