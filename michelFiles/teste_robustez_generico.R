@@ -17,7 +17,7 @@ dataset2 <- expand.grid(replicate(7, c(TRUE, FALSE), simplify = FALSE))
 results1 <- matrix(NA, nrow = nrow(dataset1), ncol = nrow(dataset2))
 results2 <- matrix(NA, nrow = nrow(dataset1), ncol = nrow(dataset2))
 
-k=1
+k=3
 k_message <- sprintf("K = %s", k)
 
 # Loop de avaliação: comparar cada linha de dataset1 com cada linha de dataset2
@@ -25,18 +25,17 @@ for (i in seq_len(nrow(dataset1))) {
   for (j in seq_len(nrow(dataset2))) {
     eval1 <- evaluate(
       har_eval_soft(k),                      # Configuração de avaliação
-      #har_eval(),
       unlist(dataset1[i, ]),
       unlist(dataset2[j, ])
     )
-    results1[i, j] <- eval1$accuracy
+    results1[i, j] <- eval1$tn_rate
 
     eval2 <- evaluate(
       har_eval(),
       unlist(dataset1[i, ]),
       unlist(dataset2[j, ])
     )
-    results2[i, j] <- eval2$accuracy
+    results2[i, j] <- eval2$tn_rate
   }
 }
 
@@ -60,23 +59,19 @@ df <- df %>% filter(!is.na(F1))
 
 ggplot(df, aes(x = Method, y = F1, fill = Method)) +
   geom_boxplot() +
-  labs(title = "Distribuição dos valores da métrica" + k_message,
+  labs(title = paste("Boxplot ", k_message),
        x = "",
        y = "") +
   theme_minimal() +
   scale_fill_brewer(palette = "Pastel1") +
   theme(
-    axis.text = element_text(size = 12),
-    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 20),
+    plot.title = element_text(size = 24, face = "bold"),
     legend.position = "none"
   )
 
 
 ###################
-
-library(tibble)
-library(ggplot2)
-library(dplyr)
 
 # Calcular a diferença ponto a ponto
 diff_f1 <- as.vector(results1 - results2)
@@ -90,13 +85,13 @@ ggplot(df_diff, aes(x = "", y = Difference)) +
   geom_boxplot(fill = "lightblue", color = "darkblue") +
   geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
   labs(
-    title = "Diferença ponto a ponto entre as métricas" + k_message,
+    title = paste("Diferença ponto a ponto", k_message),
     x = "",
     y = ""
   ) +
   theme_minimal() +
   theme(
-    axis.text = element_text(size = 12),
-    axis.title = element_text(size = 14)
+    axis.text = element_text(size = 20),
+    plot.title = element_text(size = 24, face = "bold"),
   )
 
