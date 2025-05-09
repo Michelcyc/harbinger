@@ -1,3 +1,14 @@
+remove.packages("harbinger")
+quit(save = "no")
+
+install.packages('RcppHungarian')
+library(RcppHungarian)
+
+devtools::install_github("Michelcyc/harbinger", force=TRUE, upgrade="never")
+
+library("daltoolbox")
+library("harbinger")
+
 # Gerar todos os vetores possíveis de 7 valores lógicos (TRUE/FALSE)
 dataset1 <- expand.grid(replicate(7, c(TRUE, FALSE), simplify = FALSE))
 dataset2 <- expand.grid(replicate(7, c(TRUE, FALSE), simplify = FALSE))
