@@ -51,7 +51,10 @@ evaluate.har_eval <- function(obj, detection, event, ...) {
                                   round(FN,2),round(TN,2)), nrow = 3, ncol = 2, byrow = TRUE,
                                 dimnames = list(c("detection", "TRUE","FALSE"),
                                                 c("event", ""))))
-
+  tp_rate <- TPs/(TPs+FPs+FNs+TNs)
+  fp_rate <- FPs/(TPs+FPs+FNs+TNs)
+  fn_rate <- FNs/(TPs+FPs+FNs+TNs)
+  tn_rate <- TNs/(TPs+FPs+FNs+TNs)
   accuracy <- (TP+TN)/(TP+FP+FN+TN)
   sensitivity <- TP/(TP+FN)
   specificity <- TN/(FP+TN)
@@ -72,7 +75,8 @@ evaluate.har_eval <- function(obj, detection, event, ...) {
                     prevalence=prevalence, PPV=PPV, NPV=NPV,
                     detection_rate=detection_rate, detection_prevalence=detection_prevalence,
                     balanced_accuracy=balanced_accuracy, precision=precision,
-                    recall=recall, F1=F1)
+                    recall=recall, F1=F1, tp_rate=tp_rate, fp_rate=fp_rate,
+                    fn_rate=fn_rate, tn_rate=tn_rate)
   return(s_metrics)
 }
 
