@@ -26,14 +26,14 @@ for (i in seq_len(nrow(dataset1))) {
       unlist(dataset1[i, ]),
       unlist(dataset2[j, ])
     )
-    results1[i, j] <- eval1$fp_rate
+    results1[i, j] <- eval1$tp_rate
 
     eval2 <- evaluate(
       har_eval(),
       unlist(dataset1[i, ]),
       unlist(dataset2[j, ])
     )
-    results2[i, j] <- eval2$fp_rate
+    results2[i, j] <- eval2$tp_rate
   }
 }
 
