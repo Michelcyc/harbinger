@@ -21,7 +21,7 @@ results2 <- matrix(NA, nrow = nrow(dataset1), ncol = nrow(dataset2))
 for (i in seq_len(nrow(dataset1))) {
   for (j in seq_len(nrow(dataset2))) {
     eval1 <- evaluate(
-      har_eval_soft(2),                      # Configuração de avaliação
+      har_eval_soft(1),                      # Configuração de avaliação
       unlist(dataset1[i, ]),                 # Vetor lógico de detecção
       unlist(dataset2[j, ])                  # Vetor lógico da classe real
     )

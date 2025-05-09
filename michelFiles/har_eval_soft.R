@@ -39,12 +39,13 @@ har_eval_soft <- function(sw_size = 15) {
   return(obj)
 }
 
-
 #'@importFrom daltoolbox evaluate
 #'@importFrom RcppHungarian HungarianSolver
 #'@exportS3Method evaluate har_eval_soft
 evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   soft_scores <- function(detection, event, k){
+    library(Rmpfr)
+
     # detection and event are boolean arrays
     D <- which(detection)
     n <- length(D)
@@ -86,10 +87,18 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
       list(D_mini = D_mini, E_mini = E_mini)
     })
 
-    S_d <- rep(0, length(D))
+    #S_d <- rep(0, length(D))
+    S_d <- mpfr(rep(0, length(D)), precBits = 128)
     S_d_counter <- 1
     mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
-    mu_simples <- function(d,e,k) max(min( (d-(e-k))/k, ((e+k)-d)/k ), 0)
+    #mu_simples <- function(d,e,k) max(min( (d-(e-k))/k, ((e+k)-d)/k ), 0)
+    # Convert k to high precision
+    k_mpfr <- mpfr(k, precBits = 128)
+    mu_simples <- function(d, e, k_mpfr) {
+      d <- mpfr(d, precBits = 128)
+      e <- mpfr(e, precBits = 128)
+      max(min((d - (e - k_mpfr)) / k_mpfr, ((e + k_mpfr) - d) / k_mpfr), mpfr(0, 128))
+    }
 
     for (idx in seq_along(groups)) {
       D_mini <- groups[[idx]]$D_mini
@@ -102,7 +111,7 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
       # if m = 0, this will never happen
       if (n==1 && m==1) # Direct association
       {
-        S_d[S_d_counter] <- mu_simples(D_mini[1],E_mini[1],k)
+        S_d[S_d_counter] <- mu_simples(D_mini[1],E_mini[1],k_mpfr)
         S_d_counter <- S_d_counter+1
       }
       else if (n >= 1 && m >= 1) # covers n=1 m>1, n>1 m=1, n>1 m>1
@@ -115,12 +124,13 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
         }
         associationMatrix <- RcppHungarian::HungarianSolver(-1*Mu);
         scores <- Mu[associationMatrix$pairs]
-        S_d[S_d_counter:(S_d_counter + length(scores) - 1)] <- scores
+        S_d[S_d_counter:(S_d_counter + length(scores) - 1)] <- mpfr(scores, precBits = 128)
         S_d_counter <- S_d_counter + length(scores)
       }
     }
     #S_d <- S_d / k
-    return(S_d)
+    #S_d <- S_d / k_mpfr
+    return(asNumeric(S_d))
   }
 
   detection[is.na(detection)] <- FALSE
