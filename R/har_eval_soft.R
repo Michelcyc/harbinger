@@ -88,8 +88,8 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
 
     S_d <- rep(0, length(D))
     S_d_counter <- 1
-    mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/(2*k), ((E[j]+k)-D[i])/(2*k) ), 0)
-    mu_simples <- function(d,e,k) max(min( (d-(e-k))/(2*k), ((e+k)-d)/(2*k) ), 0)
+    mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
+    mu_simples <- function(d,e,k) max(min( (d-(e-k))/k, ((e+k)-d)/k ), 0)
 
     for (idx in seq_along(groups)) {
       D_mini <- groups[[idx]]$D_mini
@@ -132,19 +132,11 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
 
   m <- length(which(event))
   t <- length(event)
-  m_adjusted <- m/obj$sw_size
-  t_adjusted <- t/obj$sw_size
-  total_adjusted <- 1/obj$sw_size
 
   TPs <- sum(scores)
-  FPs <- (sum(1 - scores)) #o score to TP naturalmente regula o FP se o K aumentar
-  FNs <- (m_adjusted-TPs)
-  TNs <- t_adjusted-FPs
-
-  #TPs <- sum(scores)
-  #FPs <- sum(1-scores)
-  #FNs <- m-TPs
-  #TNs <- (t-m)-FPs
+  FPs <- sum(1-scores)
+  FNs <- m-TPs
+  TNs <- (t-m)-FPs
 
   confMatrix <- as.table(matrix(c(as.character(TRUE),as.character(FALSE),
                                   round(TPs,2),round(FPs,2),
@@ -157,7 +149,7 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   fn_rate <- FNs/(TPs+FPs+FNs+TNs)
   tn_rate <- TNs/(TPs+FPs+FNs+TNs)
   accuracy <- (TPs+TNs)/(TPs+FPs+FNs+TNs)
-  sensitivity <- TPs/(TPs+FNs) #mesmo que recall
+  sensitivity <- TPs/(TPs+FNs)
   specificity <- TNs/(FPs+TNs)
   prevalence <- (TPs+FNs)/(TPs+FPs+FNs+TNs)
   PPV <- (sensitivity * prevalence)/((sensitivity*prevalence) + ((1-specificity)*(1-prevalence)))
