@@ -28,7 +28,7 @@ for (i in seq_len(nrow(dataset1))) {
       unlist(dataset1[i, ]),
       unlist(dataset2[j, ])
     )
-    results1[i, j] <- eval1$accuracy
+    results1[i, j] <- eval1$tn_rate
 
     eval2 <- evaluate(
       #har_eval(),
@@ -36,7 +36,7 @@ for (i in seq_len(nrow(dataset1))) {
       unlist(dataset1[i, ]),
       unlist(dataset2[j, ])
     )
-    results2[i, j] <- eval2$accuracy
+    results2[i, j] <- eval2$tn_rate
   }
 }
 
