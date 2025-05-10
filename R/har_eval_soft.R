@@ -133,11 +133,12 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   m <- length(which(event))
   t <- length(event)
   m_adjusted <- m/obj$sw_size
+  t_adjusted <- t/obj$sw_size
 
   TPs <- sum(scores)
-  FPs <- sum(1-scores)
+  FPs <- sum(total_adjusted - scores)
   FNs <- m_adjusted-TPs
-  TNs <- (t-m_adjusted)-FPs
+  TNs <- t_adjusted-FPs
 
   confMatrix <- as.table(matrix(c(as.character(TRUE),as.character(FALSE),
                                   round(TPs,2),round(FPs,2),
