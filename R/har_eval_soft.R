@@ -141,6 +141,11 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   FNs <- m_adjusted-TPs
   TNs <- t_adjusted-FPs
 
+  #TPs <- sum(scores)
+  #FPs <- sum(1-scores)
+  #FNs <- m-TPs
+  #TNs <- (t-m)-FPs
+
   confMatrix <- as.table(matrix(c(as.character(TRUE),as.character(FALSE),
                                   round(TPs,2),round(FPs,2),
                                   round(FNs,2),round(TNs,2)), nrow = 3, ncol = 2, byrow = TRUE,
