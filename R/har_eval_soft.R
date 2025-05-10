@@ -88,8 +88,8 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
 
     S_d <- rep(0, length(D))
     S_d_counter <- 1
-    mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/2*k, ((E[j]+k)-D[i])/2*k ), 0)
-    mu_simples <- function(d,e,k) max(min( (d-(e-k))/2*k, ((e+k)-d)/2*k ), 0)
+    mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/(2*k), ((E[j]+k)-D[i])/(2*k) ), 0)
+    mu_simples <- function(d,e,k) max(min( (d-(e-k))/(2*k), ((e+k)-d)/(2*k) ), 0)
 
     for (idx in seq_along(groups)) {
       D_mini <- groups[[idx]]$D_mini
