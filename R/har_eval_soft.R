@@ -157,7 +157,7 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   fn_rate <- FNs/(TPs+FPs+FNs+TNs)
   tn_rate <- TNs/(TPs+FPs+FNs+TNs)
   accuracy <- (TPs+TNs)/(TPs+FPs+FNs+TNs)
-  sensitivity <- TPs/(TPs+FNs)
+  sensitivity <- TPs/(TPs+FNs) #mesmo que recall
   specificity <- TNs/(FPs+TNs)
   prevalence <- (TPs+FNs)/(TPs+FPs+FNs+TNs)
   PPV <- (sensitivity * prevalence)/((sensitivity*prevalence) + ((1-specificity)*(1-prevalence)))
