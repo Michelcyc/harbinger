@@ -88,8 +88,8 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
 
     S_d <- rep(0, length(D))
     S_d_counter <- 1
-    mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
-    mu_simples <- function(d,e,k) max(min( (d-(e-k))/k, ((e+k)-d)/k ), 0)
+    mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/2*k, ((E[j]+k)-D[i])/2*k ), 0)
+    mu_simples <- function(d,e,k) max(min( (d-(e-k))/2*k, ((e+k)-d)/2*k ), 0)
 
     for (idx in seq_along(groups)) {
       D_mini <- groups[[idx]]$D_mini
@@ -133,18 +133,10 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   m <- length(which(event))
   t <- length(event)
 
-  adicional <- ((obj$sw_size - 1) * ((3 * t) - (obj$sw_size + 1))) / 3
-  ajuste <- 1
-  scores <- scores - adicional
-  TPs <- sum(scores) / ajuste
-  FPs <- sum(1-scores)* ajuste
-  FNs <- ( m - TPs ) * ajuste
-  TNs <- ( (t-m)-FPs ) / ajuste
-
-  #TPs <- sum(scores)
-  #FPs <- sum(1-scores)
-  #FNs <- m-TPs
-  #TNs <- (t-m)-FPs
+  TPs <- sum(scores)
+  FPs <- sum(1-scores)
+  FNs <- m-TPs
+  TNs <- (t-m)-FPs
 
   confMatrix <- as.table(matrix(c(as.character(TRUE),as.character(FALSE),
                                   round(TPs,2),round(FPs,2),
