@@ -4,8 +4,8 @@ library("daltoolbox")
 devtools::install_github("Michelcyc/harbinger", force=TRUE, upgrade="never")
 library("harbinger")
 
-install.packages('RcppHungarian')
-library(RcppHungarian)
+#install.packages('RcppHungarian')
+#library(RcppHungarian)
 
 library(tibble)
 library(dplyr)

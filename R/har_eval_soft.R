@@ -119,15 +119,14 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
         S_d_counter <- S_d_counter + length(scores)
       }
     }
-    print("Vingardion Leviosa")
     return(S_d)
   }
 
   detection[is.na(detection)] <- FALSE
 
-  if((sum(detection)==0) || (sum(event)==0)){
-    return(evaluate(har_eval(), detection, event))
-  }
+  #if((sum(detection)==0) || (sum(event)==0)){
+  #  return(evaluate(har_eval(), detection, event))
+  #}
 
   scores <- soft_scores(detection, event, obj$sw_size)
 
@@ -166,7 +165,7 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
                     prevalence=prevalence, PPV=PPV, NPV=NPV,
                     detection_rate=detection_rate, detection_prevalence=detection_prevalence,
                     balanced_accuracy=balanced_accuracy, precision=precision,
-                    recall=recall, F1=F1, testadeiro=testadeiro)
+                    recall=recall, F1=F1)
 
   return(s_metrics)
 }
