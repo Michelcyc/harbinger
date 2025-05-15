@@ -1,0 +1,24 @@
+preciso de
+
+hard$'all_metrics'[1...100]
+hard$time[1...100]
+o mesmo para soft1 e soft2
+
+eval$TP
+eval$FP
+eval$FN
+eval$TN
+eval$accuracy
+eval$sensitivity
+eval$specificity
+eval$prevalence
+eval$PPV
+eval$NPV
+eval$detection_rate
+eval$detection_prevalence
+eval$balanced_accuracy
+eval$precision
+eval$recall
+eval$F1
+eval$time
+

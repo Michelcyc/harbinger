@@ -144,6 +144,7 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
                                 dimnames = list(c("detection", "TRUE","FALSE"),
                                                 c("event", ""))))
 
+  testadeiro <- 1
   accuracy <- (TPs+TNs)/(TPs+FPs+FNs+TNs)
   sensitivity <- TPs/(TPs+FNs)
   specificity <- TNs/(FPs+TNs)
@@ -164,7 +165,7 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
                     prevalence=prevalence, PPV=PPV, NPV=NPV,
                     detection_rate=detection_rate, detection_prevalence=detection_prevalence,
                     balanced_accuracy=balanced_accuracy, precision=precision,
-                    recall=recall, F1=F1)
+                    recall=recall, F1=F1, testadeiro=testadeiro)
 
   return(s_metrics)
 }
