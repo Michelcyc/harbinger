@@ -35,8 +35,8 @@ for (i in seq_len(nrow(dataset1))) {
     results1[i, j] <- eval1$accuracy
 
     eval2 <- evaluate(
-      #har_eval(),
-      har_eval_soft(1),
+      har_eval(),
+      #har_eval_soft(1),
       unlist(dataset1[i, ]),
       unlist(dataset2[j, ])
     )

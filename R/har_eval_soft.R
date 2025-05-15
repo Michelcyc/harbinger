@@ -124,9 +124,9 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
 
   detection[is.na(detection)] <- FALSE
 
-  #if((sum(detection)==0) || (sum(event)==0)){
-  #  return(evaluate(har_eval(), detection, event))
-  #}
+  if((sum(detection)==0) || (sum(event)==0)){
+    return(evaluate(har_eval(), detection, event))
+  }
 
   scores <- soft_scores(detection, event, obj$sw_size)
 
@@ -160,12 +160,15 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   beta <- 1
   F1 <- (1+beta^2)*precision*recall/((beta^2 * precision)+recall)
 
+  Ps <- TPs+FPs/(TPs+FPs+FNs+TNs)
+  Ts <- TPs+TNs/(TPs+FPs+FNs+TNs)
+
   s_metrics <- list(TPs=TPs,FPs=FPs,FNs=FNs,TNs=TNs,confMatrix=confMatrix,accuracy=accuracy,
                     sensitivity=sensitivity, specificity=specificity,
                     prevalence=prevalence, PPV=PPV, NPV=NPV,
                     detection_rate=detection_rate, detection_prevalence=detection_prevalence,
                     balanced_accuracy=balanced_accuracy, precision=precision,
-                    recall=recall, F1=F1)
+                    recall=recall, F1=F1, Ps=Ps, Ts=Ts)
 
   return(s_metrics)
 }
