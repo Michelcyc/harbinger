@@ -161,14 +161,16 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   F1 <- (1+beta^2)*precision*recall/((beta^2 * precision)+recall)
 
   Ps <- TPs+FPs/(TPs+FPs+FNs+TNs)
+  Ns <- FNs+TNs/(TPs+FPs+FNs+TNs)
   Ts <- TPs+TNs/(TPs+FPs+FNs+TNs)
+  Fs <- FPs+FNs/(TPs+FPs+FNs+TNs)
 
   s_metrics <- list(TPs=TPs,FPs=FPs,FNs=FNs,TNs=TNs,confMatrix=confMatrix,accuracy=accuracy,
                     sensitivity=sensitivity, specificity=specificity,
                     prevalence=prevalence, PPV=PPV, NPV=NPV,
                     detection_rate=detection_rate, detection_prevalence=detection_prevalence,
                     balanced_accuracy=balanced_accuracy, precision=precision,
-                    recall=recall, F1=F1, Ps=Ps, Ts=Ts)
+                    recall=recall, F1=F1, Ps=Ps, Ns=Ns, Ts=Ts, Fs=Fs)
 
   return(s_metrics)
 }

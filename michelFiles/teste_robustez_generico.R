@@ -13,14 +13,14 @@ library(tidyr)
 library(ggplot2)
 
 # Gerar todos os vetores possíveis de 7 valores lógicos (TRUE/FALSE)
-dataset1 <- expand.grid(replicate(5, c(TRUE, FALSE), simplify = FALSE))
-dataset2 <- expand.grid(replicate(5, c(TRUE, FALSE), simplify = FALSE))
+dataset1 <- expand.grid(replicate(9, c(TRUE, FALSE), simplify = FALSE))
+dataset2 <- expand.grid(replicate(9, c(TRUE, FALSE), simplify = FALSE))
 
 # Inicializar matriz para armazenar F1-scores
 results1 <- matrix(NA, nrow = nrow(dataset1), ncol = nrow(dataset2))
 results2 <- matrix(NA, nrow = nrow(dataset1), ncol = nrow(dataset2))
 
-k=2
+k=3
 k_message <- sprintf("K = %s", k)
 
 
@@ -32,7 +32,7 @@ for (i in seq_len(nrow(dataset1))) {
       unlist(dataset1[i, ]),
       unlist(dataset2[j, ])
     )
-    results1[i, j] <- eval1$accuracy
+    results1[i, j] <- eval1$Ts
 
     eval2 <- evaluate(
       har_eval(),
@@ -40,7 +40,7 @@ for (i in seq_len(nrow(dataset1))) {
       unlist(dataset1[i, ]),
       unlist(dataset2[j, ])
     )
-    results2[i, j] <- eval2$accuracy
+    results2[i, j] <- eval2$Ts
   }
 }
 
