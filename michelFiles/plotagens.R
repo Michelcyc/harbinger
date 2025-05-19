@@ -3,113 +3,99 @@ library(dplyr)
 library(tidyr)
 
 # Load the .RData files
-
 load("michelFiles/hard.RData")
 load("michelFiles/soft1.RData")
 load("michelFiles/soft2.RData")
+load("michelFiles/soft3.RData")  # Adicionando o novo arquivo para SSED
 
-mean_time_hard <- mean(unlist(hard$time))
-mean_time_soft1 <- mean(unlist(soft1$time))
-mean_time_soft2 <- mean(unlist(soft2$time))
+hard_tempo <- sum(unlist(hard$time))
+soft1_tempo <- sum(unlist(soft1$time))
+soft2_tempo <- sum(unlist(soft2$time))
+soft3_tempo <- sum(unlist(soft3$time))
 
-# NORMALIZING
-combined_time <- c(unlist(hard$time), unlist(soft1$time), unlist(soft2$time))
+# Função para limpar valores não-finitos
+clean_values <- function(x) {
+  x <- unlist(x)
+  x[!is.finite(x)] <- NA  # Substitui infinitos/NaN por NA
+  na.omit(x)              # Remove NAs
+}
 
-# Create a normalization function based on the combined time data
-min_time <- min(combined_time)
-max_time <- max(combined_time)
+# NORMALIZAÇÃO (incluindo SSED)
+combined_time <- c(
+  clean_values(hard$time),
+  clean_values(soft1$time),
+  clean_values(soft2$time),
+  clean_values(soft3$time)
+)
+
+min_time <- min(combined_time, na.rm = TRUE)
+max_time <- max(combined_time, na.rm = TRUE)
 normalize_time <- function(x) {
   (x - min_time) / (max_time - min_time)
 }
 
+# Preparar dados (incluindo SSED) com limpeza
 hard <- list(
-  accuracy = unlist(hard$accuracy),
-  precision = unlist(hard$precision),
-  recall = unlist(hard$recall),
-  time = normalize_time(unlist(hard$time))
-)
-soft1 <- list(
-  accuracy = unlist(soft1$accuracy),
-  precision = unlist(soft1$precision),
-  recall = unlist(soft1$recall),
-  time = normalize_time(unlist(soft1$time))
-)
-soft2 <- list(
-  accuracy = unlist(soft2$accuracy),
-  precision = unlist(soft2$precision),
-  recall = unlist(soft2$recall),
-  time = normalize_time(unlist(soft2$time))
+  accuracy = clean_values(hard$accuracy),
+  precision = clean_values(hard$precision),
+  recall = clean_values(hard$recall),
+  time = normalize_time(clean_values(hard$time))
 )
 
-# Create a combined data frame
+soft1 <- list(
+  accuracy = clean_values(soft1$accuracy),
+  precision = clean_values(soft1$precision),
+  recall = clean_values(soft1$recall),
+  time = normalize_time(clean_values(soft1$time))
+)
+
+soft2 <- list(
+  accuracy = clean_values(soft2$accuracy),
+  precision = clean_values(soft2$precision),
+  recall = clean_values(soft2$recall),  # Note que corrigi para 'recall' (seu original tinha 'recall')
+  time = normalize_time(clean_values(soft2$time))
+)
+
+soft3 <- list(
+  accuracy = clean_values(soft3$accuracy),
+  precision = clean_values(soft3$precision),
+  recall = clean_values(soft3$recall),
+  time = normalize_time(clean_values(soft3$time))
+)
+
+# Criar dataframe combinado (incluindo SSED)
 data <- bind_rows(
   as_tibble(hard) %>% mutate(Method = "Hard"),
   as_tibble(soft1) %>% mutate(Method = "Soft Trad"),
-  as_tibble(soft2) %>% mutate(Method = "Soft Par")
+  as_tibble(soft2) %>% mutate(Method = "Soft Par"),
+  as_tibble(soft3) %>% mutate(Method = "SSED")
 ) %>% pivot_longer(-Method, names_to = "Metric", values_to = "Value")
 
-data$Method <- factor(data$Method, levels = c("Hard", "Soft Trad", "Soft Par"))
+# Definir ordem dos fatores (incluindo SSED)
+data$Method <- factor(data$Method, levels = c("Hard", "Soft Trad", "Soft Par", "SSED"))
 
-# Plot setup with legend at the bottom
-ggplot(data, aes(x = Metric, y = Value, fill = Method)) +
-  geom_boxplot() +
-  labs(title = NULL,
-       x = NULL, y = NULL) +
+# Plot 1: Boxplot (incluindo SSED) sem warning
+p <- ggplot(data, aes(x = Metric, y = Value, fill = Method)) +
+  geom_boxplot(na.rm = TRUE) +  # Adicionado na.rm = TRUE para silenciar warnings
+  labs(title = NULL, x = NULL, y = NULL) +
   theme_minimal() +
-  theme(axis.text.x = element_text(hjust = 1, size = 14),  # Adjust text angle and size for better readability
+  theme(axis.text.x = element_text(hjust = 1, size = 14),
         legend.position = "bottom",
-        legend.title = element_text(size = 14, face = "bold"),  # Increase and bold the legend title font size
-        legend.text = element_text(size = 14),  # Increase the legend text font size
-        legend.key.size = unit(1.5, "lines")) +  # Increase the size of the legend keys
+        legend.title = element_text(size = 14, face = "bold"),
+        legend.text = element_text(size = 14),
+        legend.key.size = unit(1.5, "lines")) +
   scale_fill_brewer(palette = "Pastel1") +
-  guides(fill = guide_legend(title = "Metric"))
+  guides(fill = guide_legend(title = "Method"))
 
-# Save the plot
+# Salvar o plot sem warnings
 ggsave("metric_distribution.png", plot = p, width = 12, height = 8, units = "in")
 
-
-
-
-#   Plotagem 2
-# Instalar pacotes necessários, se ainda não estiverem instalados
-if(!require(ggplot2)) install.packages("ggplot2")
-if(!require(reshape2)) install.packages("reshape2")
-
-# Carregar pacotes
-library(ggplot2)
-library(reshape2)
-
-# Dados
-data <- data.frame(
-  Metric = c("accuracy", "precision", "recall", "F1"),
-  Hard = c(0.96, 0.33, 0.33, 0.33),
-  Softed_Trad = c(0.97, 0.63, 0.63, 0.63),
-  Softed_Par = c(0.98, 0.76, 0.76, 0.76)
-)
-
-# Remover underscores dos nomes das colunas
-colnames(data) <- gsub("_", " ", colnames(data))
-
-# Converter dados para o formato longo
-data_melted <- melt(data, id.vars = "Metric")
-data_melted$Metric <- factor(data_melted$Metric, levels = c("accuracy", "precision", "recall", "F1"))
-
-
-# Plot
-ggplot(data_melted, aes(x = Metric, y = value, fill = variable)) +
-  geom_bar(stat = "identity", position = "dodge", color = "black") +  # Add black border to bars
-  geom_text(aes(label = value), vjust = 1.6, color = "white", position = position_dodge(0.9), size = 4, fontface = "bold") +
-  labs(fill = "Metric") +
+# Plotar diretamente no RStudio
+ggplot(data, aes(x = Metric, y = Value, fill = Method)) +
+  geom_boxplot() +
+  labs(title = "", x = NULL, y = NULL) +
   theme_minimal() +
-  theme(
-    axis.title.x = element_blank(),  # Remove x-axis title
-    axis.text.x = element_text(size = 14),
-    axis.text.y = element_blank(),  # Remove y-axis text
-    axis.title.y = element_blank(),  # Remove y-axis title
-    legend.position = "bottom",
-    legend.title = element_text(size = 14, face = "bold"),  # Increase and bold the legend title font size
-    legend.text = element_text(size = 14),  # Increase the legend text font size
-    legend.key.size = unit(1.5, "lines")
-  ) +
-  scale_fill_brewer(palette = "Pastel1")
-
+  theme(axis.text.x = element_text(size = 14, hjust = 1),  # Melhora legibilidade
+        legend.position = "bottom",
+        legend.text = element_text(size = 12)) +
+  scale_fill_brewer(palette = "Pastel1", name = "Método:")

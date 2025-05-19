@@ -61,8 +61,8 @@ ggplot(combined_data, aes(x = dataset, y = serie)) +
               aes(x = dataset, y = serie),
               width = 0.2, size = 1.0, color = "grey", alpha = 0.6) +  # Jittered outliers
   labs(title = NULL,
-       x = "Dataset",
-       y = "Value of Series") +
+       x = "Datasets",
+       y = "Valores") +
   scale_y_continuous(breaks = scales::pretty_breaks(n = 10)) +  # Increase number of Y-axis ticks
   theme_minimal() +
   theme(axis.text.x = element_text(hjust = 1))
