@@ -62,7 +62,7 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
         for (i in 2:nrow(intervals)) {
           interval <- intervals[i, ]
           if (interval["inf"] <= current["sup"]) {
-            current["sup"] <- max(current["sup"], interval["sup"])
+            current["sup"] <- interval["sup"]
           } else {
             merged[[length(merged) + 1]] <- current
             current <- interval

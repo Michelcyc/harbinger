@@ -124,6 +124,7 @@ for (i in 1:length(datasets)) {
     }
 
     model <- tryCatch({
+      model$har_outliers <- hutils$har_outliers_boxplot
       fit(model, dataset$serie)
     }, error = function(e) {
       message(paste("Erro no fit() para i =", i, "j =", j, ":", e$message))
