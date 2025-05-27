@@ -63,6 +63,11 @@ soft3 <- list(
   time = normalize_time(clean_values(soft3$time))
 )
 
+hard$time   <- hard$time[1:69]
+soft1$time  <- soft1$time[1:69]
+soft2$time  <- soft2$time[1:69]
+soft3$time  <- soft3$time[1:69]
+
 # Criar dataframe combinado (incluindo SSED)
 data <- bind_rows(
   as_tibble(hard) %>% mutate(Method = "Hard"),
