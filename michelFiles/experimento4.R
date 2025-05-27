@@ -102,6 +102,8 @@ n_methods <- 7
 # Testes #
 detections <- vector("list", length(datasets) * n_methods)
 
+hutils <- harutils()
+
 for (i in 1:length(datasets)) {
   for (j in 1:n_methods) {
     dataset <- datasets[[i]]
@@ -112,11 +114,11 @@ for (i in 1:length(datasets)) {
     } else if (j == 2) {
       model <- hanr_fbiad()
     } else if (j == 3) {
-      model <- hanr_fft_amoc() #antigo hanct_dtw(3)
+      model <- hanr_remd()
     } else if (j == 4) {
       model <- hanct_kmeans()
     } else if (j == 5) {
-      model <- hanr_fft()
+      model <- hanr_fft_amoc_cusum()
     } else if (j == 6) {
       model <- hanr_garch()
     } else if (j == 7) {
