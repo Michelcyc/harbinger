@@ -114,7 +114,7 @@ for (i in 1:length(datasets)) {
     } else if (j == 2) {
       model <- hanr_fbiad()
     } else if (j == 3) {
-      model <- hanr_remd()
+      model <- hanr_histogram()
     } else if (j == 4) {
       model <- hanct_kmeans()
     } else if (j == 5) {
