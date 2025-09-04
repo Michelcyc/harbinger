@@ -95,6 +95,28 @@ soft3 <- list(
   time = vector("list", 70)
 )
 
+soft4 <- list(
+  TPs = vector("list", 70),
+  FPs = vector("list", 70),
+  FNs = vector("list", 70),
+  TNs = vector("list", 70),
+  accuracy = vector("list", 70),
+  sensitivity = vector("list", 70),
+  specificity = vector("list", 70),
+  prevalence = vector("list", 70),
+  PPV = vector("list", 70),
+  NPV = vector("list", 70),
+  detection_rate = vector("list", 70),
+  detection_prevalence = vector("list", 70),
+  balanced_accuracy = vector("list", 70),
+  precision = vector("list", 70),
+  recall = vector("list", 70),
+  F1 = vector("list", 70),
+  time = vector("list", 70)
+)
+
+
+
 set.seed(7)
 
 n_methods <- 7
@@ -205,8 +227,8 @@ save(soft2, file = "michelFiles/soft2.RData")
 soft3 <- avaliar_soft(soft3, detections, datasets, n_methods, 3)
 save(soft3, file = "michelFiles/soft3.RData")
 
-soft3_v2 <- avaliar_soft(soft3, detections, datasets, n_methods, 3)
-save(soft3, file = "michelFiles/soft3_v2.RData")
+soft4 <- avaliar_soft(soft4, detections, datasets, n_methods, 3)
+save(soft4, file = "michelFiles/soft4.RData")
 
 mean(unlist(soft2$time))
 mean(unlist(soft2$accuracy))
@@ -214,3 +236,9 @@ mean(unlist(soft2$sensitivity))
 mean(unlist(soft2$specificity))
 mean(unlist(soft2$prevalence))
 
+mean(unlist(soft3_v2$time))
+
+sum(unlist(soft1$time))
+sum(unlist(soft2$time))
+sum(unlist(soft3$time))
+sum(unlist(soft4$time))
