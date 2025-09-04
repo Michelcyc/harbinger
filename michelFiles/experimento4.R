@@ -95,27 +95,7 @@ soft3 <- list(
   time = vector("list", 70)
 )
 
-soft4 <- list(
-  TPs = vector("list", 70),
-  FPs = vector("list", 70),
-  FNs = vector("list", 70),
-  TNs = vector("list", 70),
-  accuracy = vector("list", 70),
-  sensitivity = vector("list", 70),
-  specificity = vector("list", 70),
-  prevalence = vector("list", 70),
-  PPV = vector("list", 70),
-  NPV = vector("list", 70),
-  detection_rate = vector("list", 70),
-  detection_prevalence = vector("list", 70),
-  balanced_accuracy = vector("list", 70),
-  precision = vector("list", 70),
-  recall = vector("list", 70),
-  F1 = vector("list", 70),
-  time = vector("list", 70)
-)
-
-
+soft4 <- list()
 
 set.seed(7)
 
