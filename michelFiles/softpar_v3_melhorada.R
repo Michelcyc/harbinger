@@ -105,7 +105,17 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
         S_d[S_d_counter] <- mu_simples(D_mini[1],E_mini[1],k)
         S_d_counter <- S_d_counter+1
       }
-      else if (n >= 1 && m >= 1) # covers n=1 m>1, n>1 m=1, n>1 m>1
+      else if (n==1 && m>1) { # um D para vários E → pega o max
+        valores <- sapply(E_mini, function(e) mu_simples(D_mini[1], e, k))
+        S_d[S_d_counter] <- max(valores)
+        S_d_counter <- S_d_counter+1
+      }
+      else if (n>1 && m==1) { # vários D para um E → pega o max
+        valores <- sapply(D_mini, function(d) mu_simples(d, E_mini[1], k))
+        S_d[S_d_counter] <- max(valores)
+        S_d_counter <- S_d_counter+1
+      }
+      else if (n > 1 && m > 1) # covers n=1 m>1, n>1 m=1, n>1 m>1
       {
         Mu <- matrix(NA, nrow = n, ncol = m)
         for (j in 1:m) {
@@ -131,7 +141,7 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   scores <- soft_scores(detection, event, obj$sw_size)
 
   m <- length(which(event))
-  t <- length(event) #ok
+  t <- length(event)
 
   TPs <- sum(scores)
   FPs <- sum(1-scores)

@@ -205,6 +205,9 @@ save(soft2, file = "michelFiles/soft2.RData")
 soft3 <- avaliar_soft(soft3, detections, datasets, n_methods, 3)
 save(soft3, file = "michelFiles/soft3.RData")
 
+soft3_v2 <- avaliar_soft(soft3, detections, datasets, n_methods, 3)
+save(soft3, file = "michelFiles/soft3_v2.RData")
+
 mean(unlist(soft2$time))
 mean(unlist(soft2$accuracy))
 mean(unlist(soft2$sensitivity))
