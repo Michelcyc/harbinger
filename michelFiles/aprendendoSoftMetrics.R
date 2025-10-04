@@ -8,9 +8,34 @@ source("michelFiles/my_utils.R")
 install.packages('RcppHungarian')
 library(RcppHungarian)
 
-data("har_examples")
+data(examples_anomalies)
 
-dataset <- har_examples[[2]]
+# Using the simple time series
+dataset <- examples_anomalies$multiple
+
+
+# install.packages(c("ggplot2","patchwork")) # se precisar
+library(ggplot2)
+library(patchwork)
+
+df <- transform(dataset, t = seq_len(nrow(dataset)))
+
+p1 <- ggplot(df, aes(t, serie)) +
+  geom_line() +
+  labs(y = "série", x = NULL) +
+  theme_minimal(base_size = 11) +
+  theme(axis.text.x = element_blank())
+
+p2 <- ggplot(df, aes(t, as.integer(event))) +
+  geom_col(width = 1) +
+  scale_y_continuous(breaks = c(0,1), labels = c("FALSE","TRUE"), limits = c(0,1)) +
+  labs(y = "evento", x = "t") +
+  theme_minimal(base_size = 11)
+
+(p1 / p2) + plot_layout(heights = c(3,1))
+
+
+
 
 indexDaSerie <- 1:length(dataset$serie)
 plot_ts(x=indexDaSerie, y=dataset$serie)
