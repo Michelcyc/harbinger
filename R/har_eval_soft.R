@@ -44,6 +44,7 @@ har_eval_soft <- function(sw_size = 15) {
 #'@importFrom RcppHungarian HungarianSolver
 #'@exportS3Method evaluate har_eval_soft
 evaluate.har_eval_soft <- function(obj, detection, event, ...) {
+  mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
   complex_cases_association <- function(D_mini, E_mini, k, mu) {
     n <- length(D_mini)
     m <- length(E_mini)
@@ -104,7 +105,6 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
 
     S_d <- rep(0, length(D))
     S_d_counter <- 1
-    mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
     mu_simples <- function(d,e,k) max(min( (d-(e-k))/k, ((e+k)-d)/k ), 0)
 
     for (idx in seq_along(groups)) {
