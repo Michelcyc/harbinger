@@ -44,16 +44,16 @@ har_eval_soft <- function(sw_size = 15) {
 #'@importFrom RcppHungarian HungarianSolver
 #'@exportS3Method evaluate har_eval_soft
 evaluate.har_eval_soft <- function(obj, detection, event, ...) {
-  mu_simples <- function(d,e,k) max(min( (d-(e-k))/k, ((e+k)-d)/k ), 0)
+  detection_score <- function(d,e,k) max(min( (d-(e-k))/k, ((e+k)-d)/k ), 0)
 
-  complex_cases_association <- function(D_mini, E_mini, k, mu) {
+  complex_cases_association <- function(D_mini, E_mini, k) {
     n <- length(D_mini)
     m <- length(E_mini)
 
     Mu <- matrix(NA, nrow = n, ncol = m)
     for (j in 1:m) {
       for (i in 1:n) {
-        Mu[i, j] <- mu_simples(D_mini[i], E_mini[j], k)
+        Mu[i, j] <- detection_score(D_mini[i], E_mini[j], k)
       }
     }
 
@@ -61,6 +61,7 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
     scores <- Mu[associationMatrix$pairs]
     return(scores)
   }
+
 
   soft_scores <- function(detection, event, k){
     # detection and event are boolean arrays
@@ -116,21 +117,21 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
 
       if (n==1 && m==1) # Direct association
       {
-        S_d[S_d_counter] <- mu_simples(D_mini[1],E_mini[1],k)
+        S_d[S_d_counter] <- detection_score(D_mini[1],E_mini[1],k)
         S_d_counter <- S_d_counter+1
       }
       else if (n==1 && m>1) { # um D para vários E → pega o max
-        valores <- mu_simples(D_mini[1], E_mini, k)
+        valores <- detection_score(D_mini[1], E_mini, k)
         S_d[S_d_counter] <- max(valores)
         S_d_counter <- S_d_counter+1
       }
       else if (n>1 && m==1) { # vários D para um E → pega o max
-        valores <- mu_simples(D_mini, E_mini[1], k)
+        valores <- detection_score(D_mini, E_mini[1], k)
         S_d[S_d_counter] <- max(valores)
         S_d_counter <- S_d_counter+1
       }
       else if (n > 1 && m > 1) {
-        scores <- complex_cases_association(D_mini, E_mini, k, mu)
+        scores <- complex_cases_association(D_mini, E_mini, k)
         S_d[S_d_counter:(S_d_counter + length(scores) - 1)] <- scores
         S_d_counter <- S_d_counter + length(scores)
       }
