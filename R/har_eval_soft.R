@@ -6,10 +6,10 @@
 #'library(daltoolbox)
 #'
 #'#loading the example database
-#'data(har_examples)
+#'data(examples_anomalies)
 #'
-#'#Using the time series 14
-#'dataset <- har_examples$example14
+#'#Using the simple
+#'dataset <- examples_anomalies$simple
 #'head(dataset)
 #'
 #'# setting up time change point using GARCH
@@ -51,15 +51,40 @@ soft_scores <- function(detection, event, k){
   Mu <- matrix(NA,nrow = n, ncol = m)
   for(j in 1:m) for(i in 1:n) Mu[i,j] <- mu(j,i,E,D,k)
 
-  associationMatrix <- HungarianSolver(-1*Mu);
-  scores <- Mu[associationMatrix$pairs]
-  return(scores)
+  E_d <- list()
+  for(i in 1:n) E_d[[i]] <- which(Mu[i,] == max(Mu[i,]))
+
+  D_e <- list()
+  for(j in 1:m) D_e[[j]] <- which(sapply(1:n, function(i) j %in% E_d[[i]] & Mu[i,j] > 0))
+
+  d_e <- c()
+  for(j in 1:m) {
+    if(length(D_e[[j]])==0) d_e[j] <- NA
+    else d_e[j] <- D_e[[j]][which.max(sapply(D_e[[j]], function(i) Mu[i,j]))]
+  }
+
+  S_e <- c()
+  for(j in 1:m) {
+    if(length(D_e[[j]])==0) S_e[j] <- NA
+    #else S_e[j] <- sum(sapply(D_e[[j]], function(i) Mu[i,j])) / length(D_e[[j]]) #mean
+    else S_e[j] <- max(sapply(D_e[[j]], function(i) Mu[i,j]))  #max
+  }
+
+  S_d <- c()
+  for(i in 1:n) S_d[i] <- max(S_e[which(d_e == i)], 0)
+
+  return(S_d)
 }
 
 #'@importFrom daltoolbox evaluate
 #'@export
 evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   detection[is.na(detection)] <- FALSE
+
+  if((sum(detection)==0) || (sum(event)==0)){
+    return(evaluate(har_eval(), detection, event))
+  }
+
   scores <- soft_scores(detection, event, obj$sw_size)
 
   m <- length(which(event))
