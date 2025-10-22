@@ -1,3 +1,11 @@
+remove.packages("harbinger")
+quit(save = "no")
+
+install.packages('RcppHungarian')
+library(RcppHungarian)
+
+devtools::install_github("Michelcyc/harbinger", force=TRUE, upgrade="never")
+
 # Pacotes necessários
 library(daltoolbox)
 library(daltoolboxdp)
@@ -165,11 +173,14 @@ for (k in seq_along(detalhes_todos)) {
   num_deteccoes <- count_true(exp_k$rs$event)
 
   # Avaliação "soft" com janela deslizante (ajuste sw_size conforme o caso)
+  inicio_tempo <- Sys.time()
   avaliacao_soft <- evaluate(
     har_eval_soft(sw_size = 10),
     exp_k$rs$event,
     if ("event" %in% names(dados_k)) dados_k$event else rep(FALSE, tam_serie)
   )
+  tempo_metrica <- as.double(Sys.time() - inicio_tempo, units = "secs")
+
 
   # Linha do resumo para esta série e método
   linhas_resumo[[k]] <- data.frame(
@@ -178,6 +189,7 @@ for (k in seq_along(detalhes_todos)) {
     series        = exp_k$seriesname,
     time_fit      = exp_k$time_fit,
     time_detect   = exp_k$time_detect,
+    time_metric   = tempo_metrica,
     precision     = avaliacao_soft$precision,
     recall        = avaliacao_soft$recall,
     f1            = avaliacao_soft$F1,

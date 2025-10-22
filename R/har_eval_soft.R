@@ -62,7 +62,6 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
     return(scores)
   }
 
-
   soft_scores <- function(detection, event, k){
     # detection and event are boolean arrays
     D <- which(detection)
@@ -89,24 +88,27 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
         }
       }
       merged[[length(merged) + 1]] <- current
-      merged_matrix <- do.call(rbind, merged)  # check if this is really necessary
+      merged_matrix <- do.call(rbind, merged)
       return(merged_matrix)
     }
 
     merged_segments <- merge_intervals(segments)
 
-    # For each merged segment, create a group with 2 vectors: D_mini and E_mini
+    # Contadores solicitados
+    simple_count  <- 0L  # n==1 && m==1
+    medium_count  <- 0L  # (n==1 && m>1) ou (n>1 && m==1)
+    complex_count <- 0L  # (n>1 && m>1)
+
+    # Para cada grupo, computar scores e incrementar contadores
     groups <- lapply(1:nrow(merged_segments), function(i) {
       seg <- merged_segments[i, ]
-
       D_mini <- D[D >= seg["inf"] & D <= seg["sup"]]
       E_mini <- E[E >= seg["inf"] & E <= seg["sup"]]
-
       list(D_mini = D_mini, E_mini = E_mini)
     })
 
     S_d <- rep(0, length(D))
-    S_d_counter <- 1
+    S_d_counter <- 1L
 
     for (idx in seq_along(groups)) {
       D_mini <- groups[[idx]]$D_mini
@@ -115,45 +117,57 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
       n <- length(D_mini)
       m <- length(E_mini)
 
-      if (n==1 && m==1) # Direct association
-      {
-        S_d[S_d_counter] <- detection_score(D_mini[1],E_mini[1],k)
-        S_d_counter <- S_d_counter+1
-      }
-      else if (n==1 && m>1) { # um D para vários E → pega o max
+      if (n==1 && m==1) {                       # simples
+        simple_count <- simple_count + 1L
+        S_d[S_d_counter] <- detection_score(D_mini[1], E_mini[1], k)
+        S_d_counter <- S_d_counter + 1L
+
+      } else if (n==1 && m>1) {                 # médio (um D para vários E)
+        medium_count <- medium_count + 1L
         valores <- detection_score(D_mini[1], E_mini, k)
         S_d[S_d_counter] <- max(valores)
-        S_d_counter <- S_d_counter+1
-      }
-      else if (n>1 && m==1) { # vários D para um E → pega o max
+        S_d_counter <- S_d_counter + 1L
+
+      } else if (n>1 && m==1) {                 # médio (vários D para um E)
+        medium_count <- medium_count + 1L
         valores <- detection_score(D_mini, E_mini[1], k)
         S_d[S_d_counter] <- max(valores)
-        S_d_counter <- S_d_counter+1
-      }
-      else if (n > 1 && m > 1) {
+        S_d_counter <- S_d_counter + 1L
+
+      } else if (n > 1 && m > 1) {              # complexo
+        complex_count <- complex_count + 1L
         scores <- complex_cases_association(D_mini, E_mini, k)
         S_d[S_d_counter:(S_d_counter + length(scores) - 1)] <- scores
         S_d_counter <- S_d_counter + length(scores)
       }
     }
-    return(S_d)
+
+    # Retorna scores + contadores
+    return(list(
+      scores = S_d,
+      n_cases_simple  = simple_count,
+      n_cases_medium  = medium_count,
+      n_cases_complex = complex_count
+    ))
   }
 
   detection[is.na(detection)] <- FALSE
 
-  if((sum(detection)==0) || (sum(event)==0)){
+  # Obs.: mantive o comportamento original de early return quando não há detecções ou eventos
+  if ((sum(detection) == 0) || (sum(event) == 0)) {
     return(evaluate(har_eval(), detection, event))
   }
 
-  scores <- soft_scores(detection, event, obj$sw_size)
+  ss <- soft_scores(detection, event, obj$sw_size)
 
+  scores <- ss$scores
   m <- length(which(event))
   t <- length(event)
 
   TPs <- sum(scores)
-  FPs <- sum(1-scores)
-  FNs <- m-TPs
-  TNs <- (t-m)-FPs
+  FPs <- sum(1 - scores)
+  FNs <- m - TPs
+  TNs <- (t - m) - FPs
 
   confMatrix <- as.table(matrix(c(as.character(TRUE),as.character(FALSE),
                                   round(TPs,2),round(FPs,2),
@@ -161,13 +175,12 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
                                 dimnames = list(c("detection", "TRUE","FALSE"),
                                                 c("event", ""))))
 
-  testadeiro <- 1
   accuracy <- (TPs+TNs)/(TPs+FPs+FNs+TNs)
   sensitivity <- TPs/(TPs+FNs)
   specificity <- TNs/(FPs+TNs)
   prevalence <- (TPs+FNs)/(TPs+FPs+FNs+TNs)
   PPV <- (sensitivity * prevalence)/((sensitivity*prevalence) + ((1-specificity)*(1-prevalence)))
-  NPV <- (specificity * (1-prevalence))/(((1-sensitivity)*prevalence) + ((specificity)*(1-prevalence)))
+  NPV <- (specificity * (1-prevalence))/(((1-sensitivity)*prevalence) + (specificity*(1-prevalence)))
   detection_rate <- TPs/(TPs+FPs+FNs+TNs)
   detection_prevalence <- (TPs+FPs)/(TPs+FPs+FNs+TNs)
   balanced_accuracy <- (sensitivity+specificity)/2
@@ -182,12 +195,19 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   Ts <- TPs+TNs/(TPs+FPs+FNs+TNs)
   Fs <- FPs+FNs/(TPs+FPs+FNs+TNs)
 
-  s_metrics <- list(TPs=TPs,FPs=FPs,FNs=FNs,TNs=TNs,confMatrix=confMatrix,accuracy=accuracy,
-                    sensitivity=sensitivity, specificity=specificity,
-                    prevalence=prevalence, PPV=PPV, NPV=NPV,
-                    detection_rate=detection_rate, detection_prevalence=detection_prevalence,
-                    balanced_accuracy=balanced_accuracy, precision=precision,
-                    recall=recall, F1=F1, Ps=Ps, Ns=Ns, Ts=Ts, Fs=Fs)
+  s_metrics <- list(
+    TPs=TPs, FPs=FPs, FNs=FNs, TNs=TNs,
+    confMatrix=confMatrix,
+    accuracy=accuracy, sensitivity=sensitivity, specificity=specificity,
+    prevalence=prevalence, PPV=PPV, NPV=NPV,
+    detection_rate=detection_rate, detection_prevalence=detection_prevalence,
+    balanced_accuracy=balanced_accuracy, precision=precision, recall=recall, F1=F1,
+    Ps=Ps, Ns=Ns, Ts=Ts, Fs=Fs,
+    # >>> NOVOS CAMPOS:
+    n_cases_simple  = ss$n_cases_simple,
+    n_cases_medium  = ss$n_cases_medium,
+    n_cases_complex = ss$n_cases_complex
+  )
 
   return(s_metrics)
 }
