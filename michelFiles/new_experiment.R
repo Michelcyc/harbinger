@@ -75,66 +75,57 @@ dir.create("results", showWarnings = FALSE, recursive = TRUE)
 ## ------------------------------------------------------------
 detalhes_todos <- list()
 
-for (j in seq_along(metodos)) {                 # percorre métodos
+for (j in seq_along(metodos)) {
   modelo_atual   <- metodos[[j]]
   nome_modelo    <- names(metodos)[j]
-  detalhes_modelo <- list()                     # resultados por série deste método
+  detalhes_modelo <- list()
 
-  # Caminho do arquivo de cache para este método
   arq_cache <- file.path("results", sprintf("exp_detail_%s.RData", nome_modelo))
 
-  # Se existir resultado pré-computado, carregar para continuar de onde parou
   if (file.exists(arq_cache)) {
-    load(file = arq_cache)  # carrega objeto 'detalhes_modelo' se salvo anteriormente
+    load(file = arq_cache)  # cria 'detalhes_modelo'
+    # >>> Se já existe cache, só acumula e VAI para o próximo método
+    detalhes_todos <- c(detalhes_todos, detalhes_modelo)
+    next
   }
 
-  for (i in seq_along(series_ts)) {             # percorre séries
+  # >>> Se NÃO existe cache, aí sim calcula e salva:
+  for (i in seq_along(series_ts)) {
     dados_serie <- series_ts[[i]]
     nome_serie  <- names(series_ts)[i]
 
     result <- safe_get(detalhes_modelo, i)
-
     if (is.null(result)) {
-
-      # Se ainda não existe resultado para esta série, processa
       detalhes_modelo[[i]] <- tryCatch({
-        ## 3.1 Ajuste (fit)
         inicio_tempo <- Sys.time()
         modelo_ajustado <- fit(modelo_atual, dados_serie$value)
         tempo_ajuste <- as.double(Sys.time() - inicio_tempo, units = "secs")
 
-        ## 3.2 Detecção (detect)
         inicio_tempo <- Sys.time()
         resultado_detec <- detect(modelo_ajustado, dados_serie$value)
         tempo_deteccao <- as.double(Sys.time() - inicio_tempo, units = "secs")
 
-        ## 3.3 Empacota resultado desta série
-        result <- list(
+        list(
           md          = modelo_ajustado,
           rs          = resultado_detec,
-          dataref     = i,                 # índice da série
+          dataref     = i,
           modelname   = nome_modelo,
           datasetname = nome_base,
           seriesname  = nome_serie,
           time_fit    = tempo_ajuste,
           time_detect = tempo_deteccao
         )
-
-        ## se tudo deu certo, devolve NULL (ou qualquer valor de sucesso que preferir)
-        result
       }, error = function(e) {
         message(sprintf("Erro em %s - %s: %s", nome_modelo, nome_serie, e$message))
-        ## devolve o índice que falhou
         NULL
       })
     }
-    ## 3.4 Salva cache incremental (apenas troca de função; mesma lógica)
     atomic_save(detalhes_modelo, arq_cache, compress = "xz")
   }
 
-  ## Acumula os detalhes deste método no agregado geral
   detalhes_todos <- c(detalhes_todos, detalhes_modelo)
 }
+
 
 ## ------------------------------------------------------------
 ## 4) Sumário de desempenho (tempo e métricas) ----
@@ -175,13 +166,17 @@ for (k in seq_along(detalhes_todos)) {
   # Avaliação "soft" com janela deslizante (ajuste sw_size conforme o caso)
   inicio_tempo <- Sys.time()
   avaliacao_soft <- evaluate(
-    har_eval_soft(sw_size = 10),
+    har_eval_soft(sw_size = 5),
     exp_k$rs$event,
     if ("event" %in% names(dados_k)) dados_k$event else rep(FALSE, tam_serie)
   )
   tempo_metrica <- as.double(Sys.time() - inicio_tempo, units = "secs")
 
-
+  get1 <- function(lst, name, default = NA) {
+    val <- lst[[name]]
+    if (is.null(val) || length(val) == 0) return(default)
+    val[[1]]
+  }
   # Linha do resumo para esta série e método
   linhas_resumo[[k]] <- data.frame(
     method        = exp_k$modelname,
@@ -193,9 +188,12 @@ for (k in seq_along(detalhes_todos)) {
     precision     = avaliacao_soft$precision,
     recall        = avaliacao_soft$recall,
     f1            = avaliacao_soft$F1,
-    tam_serie     = tam_serie,        # << NOVO
-    num_eventos   = num_eventos,      # << NOVO
-    num_deteccoes = num_deteccoes,    # << NOVO
+    tam_serie     = tam_serie,
+    num_eventos   = num_eventos,
+    num_deteccoes = num_deteccoes,
+    n_cases_simple  = as.integer(get1(avaliacao_soft, "n_cases_simple",  NA_integer_)),
+    n_cases_medium  = as.integer(get1(avaliacao_soft, "n_cases_medium",  NA_integer_)),
+    n_cases_complex = as.integer(get1(avaliacao_soft, "n_cases_complex", NA_integer_)),
     stringsAsFactors = FALSE
   )
 }
@@ -208,3 +206,8 @@ resumo_experimentos <- do.call(rbind, linhas_resumo)
 save(resumo_experimentos,
      file = file.path("results", "exp_summary.RData"),
      compress = "xz")
+
+# EXTRA
+total_tempo_metric <- sum(resumo_experimentos$time_metric, na.rm = TRUE)
+print(total_tempo_metric)
+
