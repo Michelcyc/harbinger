@@ -13,6 +13,21 @@ library(tspredit)
 library(harbinger)
 library(united)
 
+# depois de library(daltoolbox) e library(daltoolboxdp)
+if (!("ts_data" %in% getNamespaceExports("daltoolbox")) &&
+    exists("ts_data", where = asNamespace("daltoolboxdp"), inherits = FALSE)) {
+
+  ns <- asNamespace("daltoolbox")
+
+  # 1) injeta o objeto na namespace
+  assignInNamespace("ts_data", daltoolboxdp::ts_data, ns = "daltoolbox")
+
+  # 2) adiciona à tabela de exports (para :: funcionar)
+  unlockBinding(".__NAMESPACE__.", ns)
+  ns$.__NAMESPACE__.$exports <- unique(c(ns$.__NAMESPACE__.$exports, "ts_data"))
+  lockBinding(".__NAMESPACE__.", ns)
+}
+
 safe_get <- function(lst, i) {
   if (i > 0 && i <= length(lst)) {
     lst[[i]]
@@ -49,23 +64,19 @@ names(metodos) <- c("fbiad", "arima")
 ## ------------------------------------------------------------
 ## 2) Preparação dos dados ----
 ## ------------------------------------------------------------
-nome_base <- "oil_3w_Type_1"
-data(oil_3w_Type_1)  # carrega a base 'gecco' no ambiente
+nome_base <- "gecco"
+data(gecco)
+#ds <- gecco  # alias
 
-# Fatiamos cada série no mesmo intervalo [16500:18000]
-# OBS: ajuste este recorte se o tamanho das séries variar.
-series_ts <- vector("list", length(gecco) - 1)
-
+series_ts <- vector("list", length(gecco))
 for (i in seq_along(series_ts)) {
   serie_nome <- names(gecco)[i]
-  # Verificação de limites para evitar erro se a série for menor
   n <- nrow(gecco[[i]])
-  if (is.null(n)) {
-    stop(sprintf("Objeto %s não é um data.frame/ts esperado.", serie_nome))
-  }
+  if (is.null(n)) stop(sprintf("Objeto %s não é um data.frame/ts esperado.", serie_nome))
   series_ts[[i]] <- gecco[[i]]
   names(series_ts)[i] <- serie_nome
 }
+
 
 ## Garante diretório de resultados
 dir.create("results", showWarnings = FALSE, recursive = TRUE)
