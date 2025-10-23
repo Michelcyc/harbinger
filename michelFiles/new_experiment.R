@@ -13,21 +13,6 @@ library(tspredit)
 library(harbinger)
 library(united)
 
-# depois de library(daltoolbox) e library(daltoolboxdp)
-if (!("ts_data" %in% getNamespaceExports("daltoolbox")) &&
-    exists("ts_data", where = asNamespace("daltoolboxdp"), inherits = FALSE)) {
-
-  ns <- asNamespace("daltoolbox")
-
-  # 1) injeta o objeto na namespace
-  assignInNamespace("ts_data", daltoolboxdp::ts_data, ns = "daltoolbox")
-
-  # 2) adiciona à tabela de exports (para :: funcionar)
-  unlockBinding(".__NAMESPACE__.", ns)
-  ns$.__NAMESPACE__.$exports <- unique(c(ns$.__NAMESPACE__.$exports, "ts_data"))
-  lockBinding(".__NAMESPACE__.", ns)
-}
-
 safe_get <- function(lst, i) {
   if (i > 0 && i <= length(lst)) {
     lst[[i]]
@@ -56,10 +41,11 @@ atomic_save <- function(x, path, compress = "xz") {
 ## 1) Preparação dos métodos (modelos) ----
 ## ------------------------------------------------------------
 metodos <- list(
-  hanr_fbiad(),  # Método 1: FBIAD
+  #hanr_fbiad(),  # Método 1: FBIAD
   hanr_arima()   # Método 2: ARIMA
 )
-names(metodos) <- c("fbiad", "arima")
+#names(metodos) <- c("fbiad", "arima")
+names(metodos) <- c("arima")
 
 ## ------------------------------------------------------------
 ## 2) Preparação dos dados ----
