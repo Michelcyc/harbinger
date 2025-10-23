@@ -49,8 +49,8 @@ names(metodos) <- c("fbiad", "arima")
 ## ------------------------------------------------------------
 ## 2) Preparação dos dados ----
 ## ------------------------------------------------------------
-nome_base <- "gecco"
-data(gecco)  # carrega a base 'gecco' no ambiente
+nome_base <- "oil_3w_Type_1"
+data(oil_3w_Type_1)  # carrega a base 'gecco' no ambiente
 
 # Fatiamos cada série no mesmo intervalo [16500:18000]
 # OBS: ajuste este recorte se o tamanho das séries variar.
@@ -166,7 +166,7 @@ for (k in seq_along(detalhes_todos)) {
   # Avaliação "soft" com janela deslizante (ajuste sw_size conforme o caso)
   inicio_tempo <- Sys.time()
   avaliacao_soft <- evaluate(
-    har_eval_soft(sw_size = 5),
+    har_eval_soft(sw_size = 10),
     exp_k$rs$event,
     if ("event" %in% names(dados_k)) dados_k$event else rep(FALSE, tam_serie)
   )
@@ -177,6 +177,19 @@ for (k in seq_along(detalhes_todos)) {
     if (is.null(val) || length(val) == 0) return(default)
     val[[1]]
   }
+
+  # extrai os valores antes do data.frame
+  n_cases_simple  <- as.integer(get1(avaliacao_soft, "n_cases_simple",  NA_integer_))
+  n_cases_medium  <- as.integer(get1(avaliacao_soft, "n_cases_medium",  NA_integer_))
+  n_cases_complex <- as.integer(get1(avaliacao_soft, "n_cases_complex", NA_integer_))
+  sigma_max_de3   <- as.numeric(get1(avaliacao_soft, "sigma_max_de3",   NA_real_))
+
+  # calcula o booleano (TRUE/FALSE)
+  linear_behavior <- !is.na(sigma_max_de3) &&
+    !is.na(num_eventos) &&
+    !is.na(num_deteccoes) &&
+    sigma_max_de3 < (num_eventos + num_deteccoes)
+
   # Linha do resumo para esta série e método
   linhas_resumo[[k]] <- data.frame(
     method        = exp_k$modelname,
@@ -191,10 +204,11 @@ for (k in seq_along(detalhes_todos)) {
     tam_serie     = tam_serie,
     num_eventos   = num_eventos,
     num_deteccoes = num_deteccoes,
-    n_cases_simple  = as.integer(get1(avaliacao_soft, "n_cases_simple",  NA_integer_)),
-    n_cases_medium  = as.integer(get1(avaliacao_soft, "n_cases_medium",  NA_integer_)),
-    n_cases_complex = as.integer(get1(avaliacao_soft, "n_cases_complex", NA_integer_)),
-    sigma_max_de3   = as.integer(get1(avaliacao_soft, "sigma_max_de3", NA_integer_)),
+    n_cases_simple  = n_cases_simple,
+    n_cases_medium  = n_cases_medium,
+    n_cases_complex = n_cases_complex,
+    sigma_max_de3   = sigma_max_de3,
+    linear_behavior = linear_behavior,
     stringsAsFactors = FALSE
   )
 }
