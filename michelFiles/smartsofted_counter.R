@@ -99,6 +99,8 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
     medium_count  <- 0L  # (n==1 && m>1) ou (n>1 && m==1)
     complex_count <- 0L  # (n>1 && m>1)
 
+    sigma_max_de3 <- 0.0
+
     # Para cada grupo, computar scores e incrementar contadores
     groups <- lapply(1:nrow(merged_segments), function(i) {
       seg <- merged_segments[i, ]
@@ -136,6 +138,8 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
 
       } else if (n > 1 && m > 1) {              # complexo
         complex_count <- complex_count + 1L
+        sigma_max_de3 <- sigma_max_de3 + (max(n, m))^3
+
         scores <- complex_cases_association(D_mini, E_mini, k)
         S_d[S_d_counter:(S_d_counter + length(scores) - 1)] <- scores
         S_d_counter <- S_d_counter + length(scores)
@@ -147,7 +151,8 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
       scores = S_d,
       n_cases_simple  = simple_count,
       n_cases_medium  = medium_count,
-      n_cases_complex = complex_count
+      n_cases_complex = complex_count,
+      sigma_max_de3   = sigma_max_de3
     ))
   }
 
@@ -206,7 +211,8 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
     # >>> NOVOS CAMPOS:
     n_cases_simple  = ss$n_cases_simple,
     n_cases_medium  = ss$n_cases_medium,
-    n_cases_complex = ss$n_cases_complex
+    n_cases_complex = ss$n_cases_complex,
+    sigma_max_de3   = ss$sigma_max_de3
   )
 
   return(s_metrics)
