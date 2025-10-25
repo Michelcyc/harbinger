@@ -41,11 +41,10 @@ atomic_save <- function(x, path, compress = "xz") {
 ## 1) Preparação dos métodos (modelos) ----
 ## ------------------------------------------------------------
 metodos <- list(
-  #hanr_fbiad(),  # Método 1: FBIAD
+  hanr_fbiad(),  # Método 1: FBIAD
   hanr_arima()   # Método 2: ARIMA
 )
-#names(metodos) <- c("fbiad", "arima")
-names(metodos) <- c("arima")
+names(metodos) <- c("fbiad", "arima")
 
 ## ------------------------------------------------------------
 ## 2) Preparação dos dados ----
