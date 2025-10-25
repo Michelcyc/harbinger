@@ -4,7 +4,9 @@ quit(save = "no")
 install.packages('RcppHungarian')
 library(RcppHungarian)
 
-devtools::install_github("Michelcyc/harbinger", force=TRUE, upgrade="never")
+#devtools::install_github("Michelcyc/harbinger", force=TRUE, upgrade="never")
+devtools::install_github("Michelcyc/harbinger@minha-trilha-nova", force = TRUE)
+
 
 # Pacotes necessários
 library(daltoolbox)
