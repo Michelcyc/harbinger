@@ -63,6 +63,7 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   }
 
   soft_scores <- function(detection, event, k){
+    #testando modificação
     # detection and event are boolean arrays
     D <- which(detection)
     n <- length(D)
