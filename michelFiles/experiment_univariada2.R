@@ -50,11 +50,35 @@ atomic_save <- function(x, path, compress = "xz") {
 ## ------------------------------------------------------------
 ## 1) Preparação dos métodos (modelos) ----
 ## ------------------------------------------------------------
+# janela comum = 30 (igual à w do FBIAD)
+w <- 30L
+prep <- tspredit::ts_norm_gminmax()
+
 metodos <- list(
-  hanr_fbiad(),  # Método 1: FBIAD
-  hanr_arima()   # Método 2: ARIMA
+  remd   = hanr_remd(noise = 0.1, trials = 5),        # REMD
+  fbiad  = hanr_fbiad(sw_size = w),                   # FBIAD (w=30)
+  arima  = hanr_arima(),                               # ARIMA (defaults)
+
+  # Regressão por ML (mesma janela w e preprocess)
+  lstm   = hanr_ml(
+    daltoolboxdp::ts_lstm(preprocess = prep, input_size = w, epochs = 10000L),
+    sw_size = w
+  ),
+  elm    = hanr_ml(
+    tspredit::ts_elm(preprocess = prep, input_size = w, actfun = "purelin"),
+    sw_size = w
+  ),
+  conv1d = hanr_ml(
+    daltoolboxdp::ts_conv1d(preprocess = prep, input_size = w, epochs = 10000L),
+    sw_size = w
+  ),
+  svm    = hanr_ml(
+    tspredit::ts_svm(preprocess = prep, input_size = w, kernel = "radial"),
+    sw_size = w
+  )
 )
-names(metodos) <- c("fbiad", "arima")
+
+names(metodos)
 
 ## ------------------------------------------------------------
 ## 2) Preparação dos dados ----
