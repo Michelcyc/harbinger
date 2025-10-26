@@ -1,6 +1,14 @@
 remove.packages("harbinger")
 quit(save = "no")
 
+suppressPackageStartupMessages({
+  library(daltoolbox)
+  library(daltoolboxdp)
+  library(tspredit)
+  library(harbinger)
+  library(united)
+})
+
 install.packages('RcppHungarian')
 library(RcppHungarian)
 
@@ -51,16 +59,25 @@ names(metodos) <- c("fbiad", "arima")
 ## ------------------------------------------------------------
 ## 2) Preparação dos dados ----
 ## ------------------------------------------------------------
-nome_base <- "gecco"
-data(gecco)
-#ds <- gecco  # alias
+dataset_name <- "ucr_ecg"
+data(list = dataset_name)
+data <- get(dataset_name)
+nome_base <- dataset_name
+stopifnot(exists("data"))
 
-series_ts <- vector("list", length(gecco))
+#data(ucr_ecg)
+#data <- ucr_ecg
+
+#load("michelFiles/datasets_indices.RData")
+#data <- datasets_indices
+
+
+series_ts <- vector("list", length(data))
 for (i in seq_along(series_ts)) {
-  serie_nome <- names(gecco)[i]
-  n <- nrow(gecco[[i]])
+  serie_nome <- names(data)[i]
+  n <- nrow(data[[i]])
   if (is.null(n)) stop(sprintf("Objeto %s não é um data.frame/ts esperado.", serie_nome))
-  series_ts[[i]] <- gecco[[i]]
+  series_ts[[i]] <- data[[i]]
   names(series_ts)[i] <- serie_nome
 }
 
