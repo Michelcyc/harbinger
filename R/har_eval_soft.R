@@ -100,6 +100,11 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
     medium_count  <- 0L  # (n==1 && m>1) ou (n>1 && m==1)
     complex_count <- 0L  # (n>1 && m>1)
 
+    # NOVO: acumuladores de (eventos + detecções) por tipo
+    ed_simple  <- 0L
+    ed_medium  <- 0L
+    ed_complex <- 0L
+
     sigma_max_de3 <- 0.0
 
     # Para cada grupo, computar scores e incrementar contadores
@@ -122,23 +127,27 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
 
       if (n==1 && m==1) {                       # simples
         simple_count <- simple_count + 1L
+        ed_simple    <- ed_simple + (n + m)     # <<< soma (1 + 1) = 2
         S_d[S_d_counter] <- detection_score(D_mini[1], E_mini[1], k)
         S_d_counter <- S_d_counter + 1L
 
-      } else if (n==1 && m>1) {                 # médio (um D para vários E)
+      } else if (n==1 && m>1) {                 # médio
         medium_count <- medium_count + 1L
+        ed_medium    <- ed_medium + (n + m)     # <<< soma (1 + m)
         valores <- detection_score(D_mini[1], E_mini, k)
         S_d[S_d_counter] <- max(valores)
         S_d_counter <- S_d_counter + 1L
 
-      } else if (n>1 && m==1) {                 # médio (vários D para um E)
+      } else if (n>1 && m==1) {                 # médio
         medium_count <- medium_count + 1L
+        ed_medium    <- ed_medium + (n + m)     # <<< soma (n + 1)
         valores <- detection_score(D_mini, E_mini[1], k)
         S_d[S_d_counter] <- max(valores)
         S_d_counter <- S_d_counter + 1L
 
       } else if (n > 1 && m > 1) {              # complexo
         complex_count <- complex_count + 1L
+        ed_complex    <- ed_complex + (n + m)   # <<< soma (n + m)
         sigma_max_de3 <- sigma_max_de3 + (max(n, m))^3
 
         scores <- complex_cases_association(D_mini, E_mini, k)
@@ -150,10 +159,14 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
     # Retorna scores + contadores
     return(list(
       scores = S_d,
-      n_cases_simple  = simple_count,
-      n_cases_medium  = medium_count,
-      n_cases_complex = complex_count,
-      sigma_max_de3   = sigma_max_de3
+      n_cases_simple   = simple_count,
+      n_cases_medium   = medium_count,
+      n_cases_complex  = complex_count,
+      sigma_max_de3    = sigma_max_de3,
+      # >>> NOVOS CAMPOS:
+      ed_simple        = ed_simple,   # total (eventos+detecções) em casos simples
+      ed_medium        = ed_medium,   # total (eventos+detecções) em casos médios
+      ed_complex       = ed_complex   # total (eventos+detecções) em casos complexos
     ))
   }
 
