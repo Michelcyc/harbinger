@@ -143,6 +143,37 @@ ggplot(df_media_ed, aes(x = reorder(dataset, media_event_plus_det),
     axis.text.y = element_text(size = 11)
   )
 
+# MÉDIA DE EVENTOS POR DATASET #
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(ggplot2)
+})
+
+# Calcula a média de eventos por dataset
+df_media_eventos <- resumo_experimentos %>%
+  distinct(dataset, series, num_eventos, .keep_all = TRUE) %>%
+  group_by(dataset) %>%
+  summarise(media_eventos = mean(num_eventos, na.rm = TRUE)) %>%
+  arrange(desc(media_eventos))
+
+# Cria o gráfico de barras
+ggplot(df_media_eventos, aes(x = reorder(dataset, media_eventos),
+                             y = media_eventos, fill = dataset)) +
+  geom_col(alpha = 0.8, width = 0.7) +
+  coord_flip() +
+  scale_y_log10() +  # Escala logarítmica opcional
+  labs(
+    title = "Média de eventos por dataset",
+    x = "Dataset",
+    y = "Média de eventos"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "none",
+    panel.grid.major.y = element_blank(),
+    axis.text.y = element_text(size = 11)
+  )
+
 
 #### BOXPLOT PRECISION RECALL E F1 ##########
 

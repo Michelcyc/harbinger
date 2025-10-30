@@ -52,6 +52,7 @@ atomic_save <- function(x, path, compress = "xz") {
 ## ------------------------------------------------------------
 # janela comum = 30 (igual à w do FBIAD)
 w <- 30L
+input_size <- 5
 prep <- tspredit::ts_norm_gminmax()
 
 metodos <- list(
@@ -61,19 +62,19 @@ metodos <- list(
 
   # Regressão por ML (mesma janela w e preprocess)
   lstm   = hanr_ml(
-    daltoolboxdp::ts_lstm(preprocess = prep, input_size = w, epochs = 10000L),
+    daltoolboxdp::ts_lstm(preprocess = prep, input_size = input_size, epochs = 10000L),
     sw_size = w
   ),
   elm    = hanr_ml(
-    tspredit::ts_elm(preprocess = prep, input_size = w, actfun = "purelin"),
+    tspredit::ts_elm(preprocess = prep, input_size = input_size, actfun = "purelin"),
     sw_size = w
   ),
   conv1d = hanr_ml(
-    daltoolboxdp::ts_conv1d(preprocess = prep, input_size = w, epochs = 10000L),
+    daltoolboxdp::ts_conv1d(preprocess = prep, input_size = input_size, epochs = 10000L),
     sw_size = w
   ),
   svm    = hanr_ml(
-    tspredit::ts_svm(preprocess = prep, input_size = w, kernel = "radial"),
+    tspredit::ts_svm(preprocess = prep, input_size = input_size, kernel = "radial"),
     sw_size = w
   )
 )
