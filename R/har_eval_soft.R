@@ -6,10 +6,10 @@
 #'library(daltoolbox)
 #'
 #'#loading the example database
-#'data(har_examples)
+#'data(examples_anomalies)
 #'
-#'#Using the time series 14
-#'dataset <- har_examples$example14
+#'#Using the simple
+#'dataset <- examples_anomalies$simple
 #'head(dataset)
 #'
 #'# setting up time change point using GARCH
@@ -39,27 +39,34 @@ har_eval_soft <- function(sw_size = 15) {
   return(obj)
 }
 
-soft_scores <- function(detection, event, k){
-  E <- which(event)
-  m <- length(E)
-
-  D <- which(detection)
-  n <- length(D)
-
-  mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
-
-  Mu <- matrix(NA,nrow = n, ncol = m)
-  for(j in 1:m) for(i in 1:n) Mu[i,j] <- mu(j,i,E,D,k)
-
-  associationMatrix <- HungarianSolver(-1*Mu);
-  scores <- Mu[associationMatrix$pairs]
-  return(scores)
-}
 
 #'@importFrom daltoolbox evaluate
-#'@export
+#'@importFrom RcppHungarian HungarianSolver
+#'@exportS3Method evaluate har_eval_soft
 evaluate.har_eval_soft <- function(obj, detection, event, ...) {
+  soft_scores <- function(detection, event, k){
+    E <- which(event)
+    m <- length(E)
+
+    D <- which(detection)
+    n <- length(D)
+
+    mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
+
+    Mu <- matrix(NA,nrow = n, ncol = m)
+    for(j in 1:m) for(i in 1:n) Mu[i,j] <- mu(j,i,E,D,k)
+
+    associationMatrix <- HungarianSolver(-1*Mu);
+    scores <- Mu[associationMatrix$pairs]
+    return(scores)
+  }
+
   detection[is.na(detection)] <- FALSE
+
+  if((sum(detection)==0) || (sum(event)==0)){
+    return(evaluate(har_eval(), detection, event))
+  }
+
   scores <- soft_scores(detection, event, obj$sw_size)
 
   m <- length(which(event))
@@ -76,6 +83,7 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
                                 dimnames = list(c("detection", "TRUE","FALSE"),
                                                 c("event", ""))))
 
+  testadeiro <- 1
   accuracy <- (TPs+TNs)/(TPs+FPs+FNs+TNs)
   sensitivity <- TPs/(TPs+FNs)
   specificity <- TNs/(FPs+TNs)
@@ -91,12 +99,17 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   beta <- 1
   F1 <- (1+beta^2)*precision*recall/((beta^2 * precision)+recall)
 
+  Ps <- TPs+FPs/(TPs+FPs+FNs+TNs)
+  Ns <- FNs+TNs/(TPs+FPs+FNs+TNs)
+  Ts <- TPs+TNs/(TPs+FPs+FNs+TNs)
+  Fs <- FPs+FNs/(TPs+FPs+FNs+TNs)
+
   s_metrics <- list(TPs=TPs,FPs=FPs,FNs=FNs,TNs=TNs,confMatrix=confMatrix,accuracy=accuracy,
                     sensitivity=sensitivity, specificity=specificity,
                     prevalence=prevalence, PPV=PPV, NPV=NPV,
                     detection_rate=detection_rate, detection_prevalence=detection_prevalence,
                     balanced_accuracy=balanced_accuracy, precision=precision,
-                    recall=recall, F1=F1)
+                    recall=recall, F1=F1, Ps=Ps, Ns=Ns, Ts=Ts, Fs=Fs)
 
   return(s_metrics)
 }

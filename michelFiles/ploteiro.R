@@ -80,7 +80,7 @@ ggplot(df, aes(x = time_metric, color = linear_behavior)) +
   labs(x = "Tempo de avaliação (s)", y = "Fração acumulada", color = "Linearidade") +
   theme_minimal()
 
-#Boxplot de precision e recall e f1
+#### BOXPLOT PRECISION RECALL E F1 ##########
 
 suppressPackageStartupMessages({
   library(dplyr)
@@ -102,7 +102,7 @@ ggplot(df_long, aes(x = metric, y = value, fill = metric)) +
   theme_minimal() +
   theme(legend.position = "none")
 
-# Registro do tempo
+########## REGISTRO DE TEMPO DE EXECUCAO #############
 suppressPackageStartupMessages({
   library(dplyr)
 })
