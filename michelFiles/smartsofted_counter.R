@@ -226,6 +226,9 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
     n_cases_simple  = ss$n_cases_simple,
     n_cases_medium  = ss$n_cases_medium,
     n_cases_complex = ss$n_cases_complex,
+    ed_simple        = ss$ed_simple,
+    ed_medium        = ss$ed_medium,
+    ed_complex       = ss$ed_complex,
     sigma_max_de3   = ss$sigma_max_de3
   )
 

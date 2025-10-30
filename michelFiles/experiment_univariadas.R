@@ -2,6 +2,9 @@
 ## Setup e instalações (se necessário)
 ## ============================================================
 
+remove.packages("harbinger")
+quit(save = "no")
+
 # Se quiser forçar reinstalação da sua branch:
 # remove.packages("harbinger")
 
