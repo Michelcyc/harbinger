@@ -285,6 +285,9 @@ for (k in seq_along(detalhes_todos)) {
     n_cases_simple  = n_cases_simple,
     n_cases_medium  = n_cases_medium,
     n_cases_complex = n_cases_complex,
+    ed_simple        = ed_simple,
+    ed_medium        = ed_medium,
+    ed_complex       = ed_complex,
     sigma_max_de3   = sigma_max_de3,
     linear_behavior = linear_behavior,
     stringsAsFactors = FALSE
