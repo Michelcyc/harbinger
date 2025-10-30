@@ -262,6 +262,9 @@ for (k in seq_along(detalhes_todos)) {
   n_cases_simple   <- as.integer(get1(avaliacao_soft, "n_cases_simple",  NA_integer_))
   n_cases_medium   <- as.integer(get1(avaliacao_soft, "n_cases_medium",  NA_integer_))
   n_cases_complex  <- as.integer(get1(avaliacao_soft, "n_cases_complex", NA_integer_))
+  ed_simple   <- as.integer(get1(avaliacao_soft, "ed_simple",  NA_integer_))
+  ed_medium   <- as.integer(get1(avaliacao_soft, "ed_medium",  NA_integer_))
+  ed_complex  <- as.integer(get1(avaliacao_soft, "ed_complex", NA_integer_))
   sigma_max_de3    <- as.numeric(get1(avaliacao_soft, "sigma_max_de3",   NA_real_))
 
   linear_behavior <- !is.na(sigma_max_de3) &&
