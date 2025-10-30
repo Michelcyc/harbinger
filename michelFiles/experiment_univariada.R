@@ -59,7 +59,7 @@ names(metodos) <- c("fbiad", "arima")
 ## ------------------------------------------------------------
 ## 2) Preparação dos dados ----
 ## ------------------------------------------------------------
-dataset_name <- "mit_bih_MLII"
+dataset_name <- "nab_artificialWithAnomaly"
 data(list = dataset_name)
 data <- get(dataset_name)
 nome_base <- dataset_name
@@ -178,7 +178,7 @@ for (k in seq_along(detalhes_todos)) {
   # Avaliação "soft" com janela deslizante (ajuste sw_size conforme o caso)
   inicio_tempo <- Sys.time()
   avaliacao_soft <- evaluate(
-    har_eval_soft(sw_size = 10),
+    har_eval_soft(sw_size = 30),
     exp_k$rs$event,
     if ("event" %in% names(dados_k)) dados_k$event else rep(FALSE, tam_serie)
   )
