@@ -222,15 +222,14 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
     detection_rate=detection_rate, detection_prevalence=detection_prevalence,
     balanced_accuracy=balanced_accuracy, precision=precision, recall=recall, F1=F1,
     Ps=Ps, Ns=Ns, Ts=Ts, Fs=Fs,
-    # >>> NOVOS CAMPOS:
     n_cases_simple  = ss$n_cases_simple,
     n_cases_medium  = ss$n_cases_medium,
     n_cases_complex = ss$n_cases_complex,
-    ed_simple        = ss$ed_simple,
-    ed_medium        = ss$ed_medium,
-    ed_complex       = ss$ed_complex,
-    sigma_max_de3   = ss$sigma_max_de3
+    sigma_max_de3   = ss$sigma_max_de3,
+    # >>> NOVOS CAMPOS:
+    ed_simple       = ss$ed_simple,
+    ed_medium       = ss$ed_medium,
+    ed_complex      = ss$ed_complex
   )
-
   return(s_metrics)
 }
