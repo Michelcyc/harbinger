@@ -80,7 +80,7 @@ ggplot(df, aes(x = time_metric, color = linear_behavior)) +
   labs(x = "Tempo de avaliação (s)", y = "Fração acumulada", color = "Linearidade") +
   theme_minimal()
 
-########### TAMANHO DAS SÉRIES DOS DATASETS e Número de eventos + detecções ##################
+#TAMANHO DAS SÉRIES DOS DATASETS #
 suppressPackageStartupMessages({
   library(dplyr)
   library(ggplot2)
@@ -101,6 +101,40 @@ ggplot(df_media_tam, aes(x = reorder(dataset, media_tam_serie), y = media_tam_se
     title = "Média do tamanho das séries por dataset",
     x = "Dataset",
     y = "Tamanho médio das séries"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "none",
+    panel.grid.major.y = element_blank(),
+    axis.text.y = element_text(size = 11)
+  )
+
+## Tamanho das deteccoes mais eventos dos datasets ###
+
+# MÉDIA DE (EVENTOS + DETECÇÕES) POR DATASET #
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(ggplot2)
+})
+
+# Calcula a média de (eventos + detecções) por dataset
+df_media_ed <- resumo_experimentos %>%
+  distinct(dataset, series, num_eventos, num_deteccoes, .keep_all = TRUE) %>%
+  mutate(event_plus_det = num_eventos + num_deteccoes) %>%
+  group_by(dataset) %>%
+  summarise(media_event_plus_det = mean(event_plus_det, na.rm = TRUE)) %>%
+  arrange(desc(media_event_plus_det))
+
+# Cria o gráfico de barras
+ggplot(df_media_ed, aes(x = reorder(dataset, media_event_plus_det),
+                        y = media_event_plus_det, fill = dataset)) +
+  geom_col(alpha = 0.8, width = 0.7) +
+  coord_flip() +
+  scale_y_log10() +  # Escala logarítmica (opcional — ajuda se houver grande variação)
+  labs(
+    title = "Média de (detecções + eventos) por dataset",
+    x = "Dataset",
+    y = "Média de (detecções + eventos)"
   ) +
   theme_minimal(base_size = 13) +
   theme(
@@ -138,8 +172,8 @@ suppressPackageStartupMessages({
 })
 
 # Rótulo deste “run” para compor o nome do arquivo
-run_label <- "run_softed"
-#run_label <- "run_softedpar"
+#run_label <- "run_softed"
+run_label <- "run_softedpar"
 #run_label <- "run_smartsofted"
 
 time_by_dataset <- resumo_experimentos %>%
@@ -161,3 +195,4 @@ save(
 
 # (opcional) imprimir um preview
 print(time_by_dataset, n = Inf)
+
