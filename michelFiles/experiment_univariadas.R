@@ -5,33 +5,18 @@
 remove.packages("harbinger")
 quit(save = "no")
 
-# Se quiser forçar reinstalação da sua branch:
-# remove.packages("harbinger")
-
-suppressPackageStartupMessages({
-  library(daltoolbox)
-  library(daltoolboxdp)
-  library(tspredit)
-  library(harbinger)
-  library(united)
-})
-
-if (!requireNamespace("RcppHungarian", quietly = TRUE)) {
-  install.packages("RcppHungarian")
-}
+install.packages('RcppHungarian')
 library(RcppHungarian)
 
 # devtools::install_github("Michelcyc/harbinger", force = TRUE, upgrade = "never")
 devtools::install_github("Michelcyc/harbinger@minha-trilha-nova", force = TRUE, upgrade = "never")
 
 # Carrega (de novo) após instalar
-suppressPackageStartupMessages({
-  library(daltoolbox)
-  library(daltoolboxdp)
-  library(tspredit)
-  library(harbinger)
-  library(united)
-})
+library(daltoolbox)
+library(daltoolboxdp)
+library(tspredit)
+library(harbinger)
+library(united)
 
 ## ============================================================
 ## Funções utilitárias
