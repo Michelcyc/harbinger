@@ -1,14 +1,7 @@
-## ============================================================
-## Setup e instalações (se necessário)
-## ============================================================
 
 remove.packages("harbinger")
 quit(save = "no")
 
-install.packages('RcppHungarian')
-library(RcppHungarian)
-
-# devtools::install_github("Michelcyc/harbinger", force = TRUE, upgrade = "never")
 devtools::install_github("Michelcyc/harbinger@minha-trilha-nova", force = TRUE, upgrade = "never")
 
 # Carrega (de novo) após instalar
