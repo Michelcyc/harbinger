@@ -63,7 +63,7 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
     Mu <- matrix(NA,nrow = n, ncol = m)
     for(j in 1:m) for(i in 1:n) Mu[i,j] <- mu(j,i,E,D,k)
 
-    associationMatrix <- HungarianSolver(-1 * Mu)
+    associationMatrix <- RcppHungarian::HungarianSolver(-1 * Mu)
     pairs <- associationMatrix$pairs
 
     # Normaliza formatos possíveis em uma matrix de 2 colunas: (row, col)
