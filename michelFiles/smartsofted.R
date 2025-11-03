@@ -1,69 +1,30 @@
-#'@title Evaluation of event detection
-#'@description Evaluation of event detection using SoftED <doi:10.48550/arXiv.2304.00439>
-#'@param sw_size tolerance window size
-#'@return `har_eval_soft` object
-#'@examples
-#'library(daltoolbox)
-#'
-#'#loading the example database
-#'data(examples_anomalies)
-#'
-#'#Using the simple
-#'dataset <- examples_anomalies$simple
-#'head(dataset)
-#'
-#'# setting up time change point using GARCH
-#'model <- hcp_garch()
-#'
-#'# fitting the model
-#'model <- fit(model, dataset$serie)
-#'
-#'# making detections
-#'detection <- detect(model, dataset$serie)
-#'
-#'# filtering detected events
-#'print(detection[(detection$event),])
-#'
-#'# evaluating the detections
-#'evaluation <- evaluate(har_eval_soft(), detection$event, dataset$event)
-#'print(evaluation$confMatrix)
-#'
-#'# ploting the results
-#'grf <- har_plot(model, dataset$serie, detection, dataset$event)
-#'plot(grf)
-#'@export
-har_eval_soft <- function(sw_size = 15) {
-  obj <- har_eval()
-  obj$sw_size <- sw_size
-  class(obj) <- append("har_eval_soft", class(obj))
-  return(obj)
-}
-
-
 #'@importFrom daltoolbox evaluate
 #'@importFrom RcppHungarian HungarianSolver
 #'@exportS3Method evaluate har_eval_soft
 evaluate.har_eval_soft <- function(obj, detection, event, ...) {
-  detection_score <- function(d,e,k) max(min( (d-(e-k))/k, ((e+k)-d)/k ), 0)
-
-  complex_cases_association <- function(D_mini, E_mini, k) {
-    n <- length(D_mini)
-    m <- length(E_mini)
-
-    Mu <- matrix(NA, nrow = n, ncol = m)
-    for (j in 1:m) {
-      for (i in 1:n) {
-        Mu[i, j] <- detection_score(D_mini[i], E_mini[j], k)
-      }
+  soft_scores <- function(detection, event, k){
+    # --- funções internas conforme solicitado ---
+    detection_score <- function(d, e, k) {
+      max(min((d - (e - k)) / k, ((e + k) - d) / k), 0)
     }
 
-    associationMatrix <- RcppHungarian::HungarianSolver(-1 * Mu)
-    scores <- Mu[associationMatrix$pairs]
-    return(scores)
-  }
+    complex_cases_association <- function(D_mini, E_mini, k) {
+      n <- length(D_mini)
+      m <- length(E_mini)
 
+      Mu <- matrix(NA, nrow = n, ncol = m)
+      for (j in 1:m) {
+        for (i in 1:n) {
+          Mu[i, j] <- detection_score(D_mini[i], E_mini[j], k)
+        }
+      }
 
-  soft_scores <- function(detection, event, k){
+      associationMatrix <- RcppHungarian::HungarianSolver(-1 * Mu)
+      scores <- Mu[associationMatrix$pairs]
+      return(scores)
+    }
+    # --- fim das funções internas ---
+
     # detection and event are boolean arrays
     D <- which(detection)
     n <- length(D)
@@ -81,7 +42,7 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
         for (i in 2:nrow(intervals)) {
           interval <- intervals[i, ]
           if (interval["inf"] <= current["sup"]) {
-            current["sup"] <- interval["sup"]
+            current["sup"] <- max(current["sup"], interval["sup"])
           } else {
             merged[[length(merged) + 1]] <- current
             current <- interval
@@ -161,7 +122,6 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
                                 dimnames = list(c("detection", "TRUE","FALSE"),
                                                 c("event", ""))))
 
-  testadeiro <- 1
   accuracy <- (TPs+TNs)/(TPs+FPs+FNs+TNs)
   sensitivity <- TPs/(TPs+FNs)
   specificity <- TNs/(FPs+TNs)
@@ -177,17 +137,12 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   beta <- 1
   F1 <- (1+beta^2)*precision*recall/((beta^2 * precision)+recall)
 
-  Ps <- TPs+FPs/(TPs+FPs+FNs+TNs)
-  Ns <- FNs+TNs/(TPs+FPs+FNs+TNs)
-  Ts <- TPs+TNs/(TPs+FPs+FNs+TNs)
-  Fs <- FPs+FNs/(TPs+FPs+FNs+TNs)
-
   s_metrics <- list(TPs=TPs,FPs=FPs,FNs=FNs,TNs=TNs,confMatrix=confMatrix,accuracy=accuracy,
                     sensitivity=sensitivity, specificity=specificity,
                     prevalence=prevalence, PPV=PPV, NPV=NPV,
                     detection_rate=detection_rate, detection_prevalence=detection_prevalence,
                     balanced_accuracy=balanced_accuracy, precision=precision,
-                    recall=recall, F1=F1, Ps=Ps, Ns=Ns, Ts=Ts, Fs=Fs)
+                    recall=recall, F1=F1)
 
   return(s_metrics)
 }
