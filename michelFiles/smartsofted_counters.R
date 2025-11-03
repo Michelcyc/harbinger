@@ -1,3 +1,52 @@
+#' @title Evaluation of event detection (SoftED)
+#' @description Soft evaluation of event detection using SoftED <doi:10.48550/arXiv.2304.00439>.
+#' @param sw_size Integer. Tolerance window size for soft matching.
+#' @return `har_eval_soft` object
+#'
+#' @examples
+#' library(daltoolbox)
+#'
+#' # Load anomaly example data
+#' data(examples_anomalies)
+#'
+#' # Use the simple series
+#' dataset <- examples_anomalies$simple
+#' head(dataset)
+#'
+#' # Configure a change-point detector (GARCH)
+#' model <- hcp_garch()
+#'
+#' # Fit the detector
+#' model <- fit(model, dataset$serie)
+#'
+#' # Run detection
+#' detection <- detect(model, dataset$serie)
+#'
+#' # Show detected events
+#' print(detection[(detection$event),])
+#'
+#' # Evaluate detections (SoftED)
+#' evaluation <- evaluate(har_eval_soft(), detection$event, dataset$event)
+#' print(evaluation$confMatrix)
+#'
+#' # Plot the results
+#' grf <- har_plot(model, dataset$serie, detection, dataset$event)
+#' plot(grf)
+#'
+#' @references
+#' - Salles, R., Lima, J., Reis, M., Coutinho, R., Pacitti, E., Masseglia, F., Akbarinia, R.,
+#'   Chen, C., Garibaldi, J., Porto, F., Ogasawara, E. SoftED: Metrics for soft evaluation of
+#'   time series event detection. Computers and Industrial Engineering, 2024.
+#'   doi:10.1016/j.cie.2024.110728
+#'@export
+har_eval_soft <- function(sw_size = 15) {
+  obj <- har_eval()
+  obj$sw_size <- sw_size
+  class(obj) <- append("har_eval_soft", class(obj))
+  return(obj)
+}
+
+
 #'@importFrom daltoolbox evaluate
 #'@importFrom RcppHungarian HungarianSolver
 #'@exportS3Method evaluate har_eval_soft
@@ -125,13 +174,13 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
         sigma_max_de3 <- sigma_max_de3 + (max(n, m))^3
       }
     }
-    stats$simple         <- simple_count
-    stats$medium         <- medium_count
-    stats$complex        <- complex_count
-    stats$ed_simple      <- ed_simple
-    stats$ed_medium      <- ed_medium
-    stats$ed_complex     <- ed_complex
-    stats$sigma_max_de3  <- sigma_max_de3
+    stats$simple         <<- simple_count
+    stats$medium         <<- medium_count
+    stats$complex        <<- complex_count
+    stats$ed_simple      <<- ed_simple
+    stats$ed_medium      <<- ed_medium
+    stats$ed_complex     <<- ed_complex
+    stats$sigma_max_de3  <<- sigma_max_de3
     return(S_d)
   }
 
