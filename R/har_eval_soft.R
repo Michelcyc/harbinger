@@ -51,6 +51,12 @@ har_eval_soft <- function(sw_size = 15) {
 #'@importFrom RcppHungarian HungarianSolver
 #'@exportS3Method evaluate har_eval_soft
 evaluate.har_eval_soft <- function(obj, detection, event, ...) {
+  stats <- list(
+    simple = 0L, medium = 0L, complex = 0L,
+    ed_simple = 0L, ed_medium = 0L, ed_complex = 0L,
+    sigma_max_de3 = 0.0
+  )
+
   soft_scores <- function(detection, event, k){
     # --- funções internas conforme solicitado ---
     detection_score <- function(d, e, k) {
@@ -105,6 +111,15 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
 
     merged_segments <- merge_intervals(segments)
 
+    # Contadores solicitados
+    simple_count  <- 0L  # n==1 && m==1
+    medium_count  <- 0L  # (n==1 && m>1) ou (n>1 && m==1)
+    complex_count <- 0L  # (n>1 && m>1)
+    ed_simple  <- 0L
+    ed_medium  <- 0L
+    ed_complex <- 0L
+    sigma_max_de3 <- 0.0
+
     # For each merged segment, create a group with 2 vectors: D_mini and E_mini
     groups <- lapply(1:nrow(merged_segments), function(i) {
       seg <- merged_segments[i, ]
@@ -129,23 +144,43 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
       {
         S_d[S_d_counter] <- detection_score(D_mini[1],E_mini[1],k)
         S_d_counter <- S_d_counter+1
+        #Counters
+        simple_count <- simple_count + 1L
+        ed_simple    <- ed_simple + (n + m)
       }
       else if (n==1 && m>1) { # um D para vários E → pega o max
         valores <- detection_score(D_mini[1], E_mini, k)
         S_d[S_d_counter] <- max(valores)
         S_d_counter <- S_d_counter+1
+        #Counters
+        medium_count <- medium_count + 1L
+        ed_medium    <- ed_medium + (n + m)
       }
       else if (n>1 && m==1) { # vários D para um E → pega o max
         valores <- detection_score(D_mini, E_mini[1], k)
         S_d[S_d_counter] <- max(valores)
         S_d_counter <- S_d_counter+1
+        #Counters
+        medium_count <- medium_count + 1L
+        ed_medium    <- ed_medium + (n + m)
       }
       else if (n > 1 && m > 1) {
         scores <- complex_cases_association(D_mini, E_mini, k)
         S_d[S_d_counter:(S_d_counter + length(scores) - 1)] <- scores
         S_d_counter <- S_d_counter + length(scores)
+        #Counters
+        complex_count <- complex_count + 1L
+        ed_complex    <- ed_complex + (n + m)   # <<< soma (n + m)
+        sigma_max_de3 <- sigma_max_de3 + (max(n, m))^3
       }
     }
+    stats$simple         <- simple_count
+    stats$medium         <- medium_count
+    stats$complex        <- complex_count
+    stats$ed_simple      <- ed_simple
+    stats$ed_medium      <- ed_medium
+    stats$ed_complex     <- ed_complex
+    stats$sigma_max_de3  <- sigma_max_de3
     return(S_d)
   }
 
@@ -191,7 +226,12 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
                     prevalence=prevalence, PPV=PPV, NPV=NPV,
                     detection_rate=detection_rate, detection_prevalence=detection_prevalence,
                     balanced_accuracy=balanced_accuracy, precision=precision,
-                    recall=recall, F1=F1)
-
+                    recall=recall, F1=F1, n_cases_simple  = stats$simple,
+                    n_cases_medium  = stats$medium,
+                    n_cases_complex = stats$complex,
+                    ed_simple       = stats$ed_simple,
+                    ed_medium       = stats$ed_medium,
+                    ed_complex      = stats$ed_complex,
+                    sigma_max_de3   = stats$sigma_max_de3)
   return(s_metrics)
 }
