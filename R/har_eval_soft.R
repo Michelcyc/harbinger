@@ -1,138 +1,75 @@
+#' @title Evaluation of event detection (SoftED)
+#' @description Soft evaluation of event detection using SoftED <doi:10.48550/arXiv.2304.00439>.
+#' @param sw_size Integer. Tolerance window size for soft matching.
+#' @return `har_eval_soft` object
+#'
+#' @examples
+#' library(daltoolbox)
+#'
+#' # Load anomaly example data
+#' data(examples_anomalies)
+#'
+#' # Use the simple series
+#' dataset <- examples_anomalies$simple
+#' head(dataset)
+#'
+#' # Configure a change-point detector (GARCH)
+#' model <- hcp_garch()
+#'
+#' # Fit the detector
+#' model <- fit(model, dataset$serie)
+#'
+#' # Run detection
+#' detection <- detect(model, dataset$serie)
+#'
+#' # Show detected events
+#' print(detection[(detection$event),])
+#'
+#' # Evaluate detections (SoftED)
+#' evaluation <- evaluate(har_eval_soft(), detection$event, dataset$event)
+#' print(evaluation$confMatrix)
+#'
+#' # Plot the results
+#' grf <- har_plot(model, dataset$serie, detection, dataset$event)
+#' plot(grf)
+#'
+#' @references
+#' - Salles, R., Lima, J., Reis, M., Coutinho, R., Pacitti, E., Masseglia, F., Akbarinia, R.,
+#'   Chen, C., Garibaldi, J., Porto, F., Ogasawara, E. SoftED: Metrics for soft evaluation of
+#'   time series event detection. Computers and Industrial Engineering, 2024.
+#'   doi:10.1016/j.cie.2024.110728
+#'@export
+har_eval_soft <- function(sw_size = 15) {
+  obj <- har_eval()
+  obj$sw_size <- sw_size
+  class(obj) <- append("har_eval_soft", class(obj))
+  return(obj)
+}
+
+
 #'@importFrom daltoolbox evaluate
 #'@importFrom RcppHungarian HungarianSolver
 #'@exportS3Method evaluate har_eval_soft
 evaluate.har_eval_soft <- function(obj, detection, event, ...) {
-  stats <- list(
-    simple = 0L, medium = 0L, complex = 0L,
-    ed_simple = 0L, ed_medium = 0L, ed_complex = 0L,
-    sigma_max_de3 = 0.0
-  )
-
   soft_scores <- function(detection, event, k){
-    # --- funções internas conforme solicitado ---
-    detection_score <- function(d, e, k) {
-      pmax(pmin((d - (e - k)) / k, ((e + k) - d) / k), 0)
-    }
-
-    complex_cases_association <- function(D_mini, E_mini, k) {
-      n <- length(D_mini)
-      m <- length(E_mini)
-
-      Mu <- matrix(NA, nrow = n, ncol = m)
-      for (j in 1:m) {
-        for (i in 1:n) {
-          Mu[i, j] <- detection_score(D_mini[i], E_mini[j], k)
-        }
-      }
-
-      associationMatrix <- RcppHungarian::HungarianSolver(-1 * Mu)
-      scores <- Mu[associationMatrix$pairs]
-      return(scores)
-    }
-    # --- fim das funções internas ---
-
-    # detection and event are boolean arrays
-    D <- which(detection)
-    n <- length(D)
     E <- which(event)
     m <- length(E)
 
-    # Create the initial segments and sort them
-    segments <- t(vapply(E, function(x) c(inf = x - k, sup = x + k), numeric(2)))
+    D <- which(detection)
+    n <- length(D)
 
-    # Function to merge overlapping intervals
-    merge_intervals <- function(intervals) {
-      merged <- list()
-      current <- intervals[1, ]
-      if (nrow(intervals) > 1) {
-        for (i in 2:nrow(intervals)) {
-          interval <- intervals[i, ]
-          if (interval["inf"] <= current["sup"]) {
-            current["sup"] <- max(current["sup"], interval["sup"])
-          } else {
-            merged[[length(merged) + 1]] <- current
-            current <- interval
-          }
-        }
-      }
-      merged[[length(merged) + 1]] <- current
-      merged_matrix <- do.call(rbind, merged)  # check if this is really necessary
-      return(merged_matrix)
-    }
+    mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
 
-    merged_segments <- merge_intervals(segments)
+    Mu <- matrix(NA,nrow = n, ncol = m)
+    for(j in 1:m) for(i in 1:n) Mu[i,j] <- mu(j,i,E,D,k)
 
-    # Contadores solicitados
-    simple_count  <- 0L  # n==1 && m==1
-    medium_count  <- 0L  # (n==1 && m>1) ou (n>1 && m==1)
-    complex_count <- 0L  # (n>1 && m>1)
-    ed_simple  <- 0L
-    ed_medium  <- 0L
-    ed_complex <- 0L
-    sigma_max_de3 <- 0.0
+    associationMatrix <- RcppHungarian::HungarianSolver(-1*Mu)
+    S_d <- Mu[associationMatrix$pairs]
+    len_S_d <- length(S_d)
+    scores <- numeric(n)
+    scores[seq_len(len_S_d)] <- S_d[seq_len(len_S_d)]
 
-    # For each merged segment, create a group with 2 vectors: D_mini and E_mini
-    groups <- lapply(1:nrow(merged_segments), function(i) {
-      seg <- merged_segments[i, ]
-
-      D_mini <- D[D >= seg["inf"] & D <= seg["sup"]]
-      E_mini <- E[E >= seg["inf"] & E <= seg["sup"]]
-
-      list(D_mini = D_mini, E_mini = E_mini)
-    })
-
-    S_d <- rep(0, length(D))
-    S_d_counter <- 1
-
-    for (idx in seq_along(groups)) {
-      D_mini <- groups[[idx]]$D_mini
-      E_mini <- groups[[idx]]$E_mini
-
-      n <- length(D_mini)
-      m <- length(E_mini)
-
-      if (n==1 && m==1) # Direct association
-      {
-        S_d[S_d_counter] <- detection_score(D_mini[1],E_mini[1],k)
-        S_d_counter <- S_d_counter+1
-        #Counters
-        simple_count <- simple_count + 1L
-        ed_simple    <- ed_simple + (n + m)
-      }
-      else if (n==1 && m>1) { # um D para vários E → pega o max
-        valores <- detection_score(D_mini[1], E_mini, k)
-        S_d[S_d_counter] <- max(valores)
-        S_d_counter <- S_d_counter+1
-        #Counters
-        medium_count <- medium_count + 1L
-        ed_medium    <- ed_medium + (n + m)
-      }
-      else if (n>1 && m==1) { # vários D para um E → pega o max
-        valores <- detection_score(D_mini, E_mini[1], k)
-        S_d[S_d_counter] <- max(valores)
-        S_d_counter <- S_d_counter+1
-        #Counters
-        medium_count <- medium_count + 1L
-        ed_medium    <- ed_medium + (n + m)
-      }
-      else if (n > 1 && m > 1) {
-        scores <- complex_cases_association(D_mini, E_mini, k)
-        S_d[S_d_counter:(S_d_counter + length(scores) - 1)] <- scores
-        S_d_counter <- S_d_counter + length(scores)
-        #Counters
-        complex_count <- complex_count + 1L
-        ed_complex    <- ed_complex + (n + m)   # <<< soma (n + m)
-        sigma_max_de3 <- sigma_max_de3 + (max(n, m))^3
-      }
-    }
-    stats$simple         <- simple_count
-    stats$medium         <- medium_count
-    stats$complex        <- complex_count
-    stats$ed_simple      <- ed_simple
-    stats$ed_medium      <- ed_medium
-    stats$ed_complex     <- ed_complex
-    stats$sigma_max_de3  <- sigma_max_de3
-    return(S_d)
+    return(scores)
   }
 
   detection[is.na(detection)] <- FALSE
@@ -177,12 +114,7 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
                     prevalence=prevalence, PPV=PPV, NPV=NPV,
                     detection_rate=detection_rate, detection_prevalence=detection_prevalence,
                     balanced_accuracy=balanced_accuracy, precision=precision,
-                    recall=recall, F1=F1, n_cases_simple  = stats$simple,
-                    n_cases_medium  = stats$medium,
-                    n_cases_complex = stats$complex,
-                    ed_simple       = stats$ed_simple,
-                    ed_medium       = stats$ed_medium,
-                    ed_complex      = stats$ed_complex,
-                    sigma_max_de3   = stats$sigma_max_de3)
+                    recall=recall, F1=F1)
+
   return(s_metrics)
 }
