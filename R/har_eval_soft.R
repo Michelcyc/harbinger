@@ -1,75 +1,103 @@
-#' @title Evaluation of event detection (SoftED)
-#' @description Soft evaluation of event detection using SoftED <doi:10.48550/arXiv.2304.00439>.
-#' @param sw_size Integer. Tolerance window size for soft matching.
-#' @return `har_eval_soft` object
-#'
-#' @examples
-#' library(daltoolbox)
-#'
-#' # Load anomaly example data
-#' data(examples_anomalies)
-#'
-#' # Use the simple series
-#' dataset <- examples_anomalies$simple
-#' head(dataset)
-#'
-#' # Configure a change-point detector (GARCH)
-#' model <- hcp_garch()
-#'
-#' # Fit the detector
-#' model <- fit(model, dataset$serie)
-#'
-#' # Run detection
-#' detection <- detect(model, dataset$serie)
-#'
-#' # Show detected events
-#' print(detection[(detection$event),])
-#'
-#' # Evaluate detections (SoftED)
-#' evaluation <- evaluate(har_eval_soft(), detection$event, dataset$event)
-#' print(evaluation$confMatrix)
-#'
-#' # Plot the results
-#' grf <- har_plot(model, dataset$serie, detection, dataset$event)
-#' plot(grf)
-#'
-#' @references
-#' - Salles, R., Lima, J., Reis, M., Coutinho, R., Pacitti, E., Masseglia, F., Akbarinia, R.,
-#'   Chen, C., Garibaldi, J., Porto, F., Ogasawara, E. SoftED: Metrics for soft evaluation of
-#'   time series event detection. Computers and Industrial Engineering, 2024.
-#'   doi:10.1016/j.cie.2024.110728
-#'@export
-har_eval_soft <- function(sw_size = 15) {
-  obj <- har_eval()
-  obj$sw_size <- sw_size
-  class(obj) <- append("har_eval_soft", class(obj))
-  return(obj)
-}
-
-
 #'@importFrom daltoolbox evaluate
 #'@importFrom RcppHungarian HungarianSolver
 #'@exportS3Method evaluate har_eval_soft
 evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   soft_scores <- function(detection, event, k){
+    # --- funções internas conforme solicitado ---
+    detection_score <- function(d, e, k) {
+      max(min((d - (e - k)) / k, ((e + k) - d) / k), 0)
+    }
+
+    complex_cases_association <- function(D_mini, E_mini, k) {
+      n <- length(D_mini)
+      m <- length(E_mini)
+
+      Mu <- matrix(NA, nrow = n, ncol = m)
+      for (j in 1:m) {
+        for (i in 1:n) {
+          Mu[i, j] <- detection_score(D_mini[i], E_mini[j], k)
+        }
+      }
+
+      associationMatrix <- RcppHungarian::HungarianSolver(-1 * Mu)
+      scores <- Mu[associationMatrix$pairs]
+      return(scores)
+    }
+    # --- fim das funções internas ---
+
+    # detection and event are boolean arrays
+    D <- which(detection)
+    n <- length(D)
     E <- which(event)
     m <- length(E)
 
-    D <- which(detection)
-    n <- length(D)
+    # Create the initial segments and sort them
+    segments <- t(vapply(E, function(x) c(inf = x - k, sup = x + k), numeric(2)))
 
-    mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
+    # Function to merge overlapping intervals
+    merge_intervals <- function(intervals) {
+      merged <- list()
+      current <- intervals[1, ]
+      if (nrow(intervals) > 1) {
+        for (i in 2:nrow(intervals)) {
+          interval <- intervals[i, ]
+          if (interval["inf"] <= current["sup"]) {
+            current["sup"] <- max(current["sup"], interval["sup"])
+          } else {
+            merged[[length(merged) + 1]] <- current
+            current <- interval
+          }
+        }
+      }
+      merged[[length(merged) + 1]] <- current
+      merged_matrix <- do.call(rbind, merged)  # check if this is really necessary
+      return(merged_matrix)
+    }
 
-    Mu <- matrix(NA,nrow = n, ncol = m)
-    for(j in 1:m) for(i in 1:n) Mu[i,j] <- mu(j,i,E,D,k)
+    merged_segments <- merge_intervals(segments)
 
-    associationMatrix <- RcppHungarian::HungarianSolver(-1*Mu)
-    S_d <- Mu[associationMatrix$pairs]
-    len_S_d <- length(S_d)
-    scores <- numeric(n)
-    scores[seq_len(len_S_d)] <- S_d[seq_len(len_S_d)]
+    # For each merged segment, create a group with 2 vectors: D_mini and E_mini
+    groups <- lapply(1:nrow(merged_segments), function(i) {
+      seg <- merged_segments[i, ]
 
-    return(scores)
+      D_mini <- D[D >= seg["inf"] & D <= seg["sup"]]
+      E_mini <- E[E >= seg["inf"] & E <= seg["sup"]]
+
+      list(D_mini = D_mini, E_mini = E_mini)
+    })
+
+    S_d <- rep(0, length(D))
+    S_d_counter <- 1
+
+    for (idx in seq_along(groups)) {
+      D_mini <- groups[[idx]]$D_mini
+      E_mini <- groups[[idx]]$E_mini
+
+      n <- length(D_mini)
+      m <- length(E_mini)
+
+      if (n==1 && m==1) # Direct association
+      {
+        S_d[S_d_counter] <- detection_score(D_mini[1],E_mini[1],k)
+        S_d_counter <- S_d_counter+1
+      }
+      else if (n==1 && m>1) { # um D para vários E → pega o max
+        valores <- detection_score(D_mini[1], E_mini, k)
+        S_d[S_d_counter] <- max(valores)
+        S_d_counter <- S_d_counter+1
+      }
+      else if (n>1 && m==1) { # vários D para um E → pega o max
+        valores <- detection_score(D_mini, E_mini[1], k)
+        S_d[S_d_counter] <- max(valores)
+        S_d_counter <- S_d_counter+1
+      }
+      else if (n > 1 && m > 1) {
+        scores <- complex_cases_association(D_mini, E_mini, k)
+        S_d[S_d_counter:(S_d_counter + length(scores) - 1)] <- scores
+        S_d_counter <- S_d_counter + length(scores)
+      }
+    }
+    return(S_d)
   }
 
   detection[is.na(detection)] <- FALSE
