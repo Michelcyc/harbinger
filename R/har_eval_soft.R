@@ -63,32 +63,9 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
     Mu <- matrix(NA,nrow = n, ncol = m)
     for(j in 1:m) for(i in 1:n) Mu[i,j] <- mu(j,i,E,D,k)
 
-    associationMatrix <- RcppHungarian::HungarianSolver(-1 * Mu)
-    pairs <- associationMatrix$pairs
-
-    # Normaliza formatos comuns e extrai scores corretamente (row,col)
-    if (is.list(pairs) && length(pairs) == 2 && length(pairs[[1]]) == length(pairs[[2]])) {
-      pairs <- cbind(pairs[[1]], pairs[[2]])
-    }
-    if (is.data.frame(pairs)) pairs <- as.matrix(pairs)
-    if (is.vector(pairs) && !is.matrix(pairs) && length(pairs) %% 2 == 0) {
-      pairs <- matrix(pairs, ncol = 2, byrow = TRUE)
-    }
-
-    if (!is.null(pairs) && is.matrix(pairs) && ncol(pairs) == 2 && nrow(pairs) > 0) {
-      row_idx <- as.integer(pairs[,1])
-      col_idx <- as.integer(pairs[,2])
-      # filtra apenas pares válidos (col_idx == 0 indica "sem match" em RcppHungarian)
-      valid <- which(row_idx >= 1 & row_idx <= nrow(Mu) &
-                       col_idx >= 1 & col_idx <= ncol(Mu))
-      if (length(valid) == 0) {
-        scores <- numeric(0)
-      } else {
-        scores <- Mu[cbind(row_idx[valid], col_idx[valid])]
-      }
-    } else {
-      scores <- numeric(0)
-    }
+    associationMatrix <- RcppHungarian::HungarianSolver(-1*Mu)
+    scores <- numeric(n)
+    scores <- Mu[associationMatrix$pairs]
     return(scores)
   }
 

@@ -287,3 +287,4 @@ save(resumo_experimentos,
 # EXTRA
 total_tempo_metric <- sum(resumo_experimentos$time_metric, na.rm = TRUE)
 print(total_tempo_metric)
+
