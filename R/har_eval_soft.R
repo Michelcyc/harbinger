@@ -64,8 +64,11 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
     for(j in 1:m) for(i in 1:n) Mu[i,j] <- mu(j,i,E,D,k)
 
     associationMatrix <- RcppHungarian::HungarianSolver(-1*Mu)
+    S_d <- Mu[associationMatrix$pairs]
+    len_S_d <- length(S_d)
     scores <- numeric(n)
-    scores <- Mu[associationMatrix$pairs]
+    scores[seq_len(len_S_d)] <- S_d[seq_len(len_S_d)]
+
     return(scores)
   }
 
