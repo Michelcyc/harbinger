@@ -174,13 +174,13 @@ evaluate.har_eval_soft <- function(obj, detection, event, ...) {
         sigma_max_de3 <- sigma_max_de3 + (max(n, m))^3
       }
     }
-    stats$simple         <- simple_count
-    stats$medium         <- medium_count
-    stats$complex        <- complex_count
-    stats$ed_simple      <- ed_simple
-    stats$ed_medium      <- ed_medium
-    stats$ed_complex     <- ed_complex
-    stats$sigma_max_de3  <- sigma_max_de3
+    stats$simple         <<- simple_count
+    stats$medium         <<- medium_count
+    stats$complex        <<- complex_count
+    stats$ed_simple      <<- ed_simple
+    stats$ed_medium      <<- ed_medium
+    stats$ed_complex     <<- ed_complex
+    stats$sigma_max_de3  <<- sigma_max_de3
     return(S_d)
   }
 
