@@ -61,12 +61,35 @@ get1 <- function(lst, name, default = NA) {
 ## ============================================================
 ## 2) Métodos
 ## ============================================================
-metodos <- list(
-  hanr_fbiad(),
-  hanr_arima()
-)
-names(metodos) <- c("fbiad", "arima")
+w <- 30L
+input_size <- 5
+prep <- tspredit::ts_norm_gminmax()
 
+metodos <- list(
+  remd   = hanr_remd(noise = 0.1, trials = 5),        # REMD
+  fbiad  = hanr_fbiad(sw_size = w),                   # FBIAD (w=30)
+  arima  = hanr_arima(),                               # ARIMA (defaults)
+
+  # Regressão por ML (mesma janela w e preprocess)
+  lstm   = hanr_ml(
+    daltoolboxdp::ts_lstm(preprocess = prep, input_size = input_size, epochs = 10000L),
+    sw_size = w
+  ),
+  elm    = hanr_ml(
+    tspredit::ts_elm(preprocess = prep, input_size = input_size, actfun = "purelin"),
+    sw_size = w
+  ),
+  conv1d = hanr_ml(
+    daltoolboxdp::ts_conv1d(preprocess = prep, input_size = input_size, epochs = 10000L),
+    sw_size = w
+  ),
+  svm    = hanr_ml(
+    tspredit::ts_svm(preprocess = prep, input_size = input_size, kernel = "radial"),
+    sw_size = w
+  )
+)
+
+names(metodos)
 ## ============================================================
 ## 3) Datasets
 ## ============================================================
