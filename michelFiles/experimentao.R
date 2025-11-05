@@ -66,7 +66,7 @@ input_size <- 5
 prep <- tspredit::ts_norm_gminmax()
 
 metodos <- list(
-  remd   = hanr_remd(noise = 0.1, trials = 5),        # REMD
+  #remd   = hanr_remd(noise = 0.05, trials = 2),        # REMD
   fbiad  = hanr_fbiad(sw_size = w),                   # FBIAD (w=30)
   arima  = hanr_arima(),                               # ARIMA (defaults)
 
@@ -78,15 +78,15 @@ metodos <- list(
   elm    = hanr_ml(
     tspredit::ts_elm(preprocess = prep, input_size = input_size, actfun = "purelin"),
     sw_size = w
-  ),
-  conv1d = hanr_ml(
-    daltoolboxdp::ts_conv1d(preprocess = prep, input_size = input_size, epochs = 10000L),
-    sw_size = w
-  ),
-  svm    = hanr_ml(
-    tspredit::ts_svm(preprocess = prep, input_size = input_size, kernel = "radial"),
-    sw_size = w
   )
+#  conv1d = hanr_ml(
+#    daltoolboxdp::ts_conv1d(preprocess = prep, input_size = input_size, epochs = 10000L),
+#    sw_size = w
+#  ),
+#  svm    = hanr_ml(
+#    tspredit::ts_svm(preprocess = prep, input_size = input_size, kernel = "radial"),
+#    sw_size = w
+#  )
 )
 
 names(metodos)
