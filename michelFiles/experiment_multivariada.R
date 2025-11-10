@@ -90,7 +90,9 @@ for (j in seq_along(metodos)) {
   arq_cache <- file.path("results", sprintf("exp_detail_%s_%s_mv.RData", nome_base, nome_modelo))
 
   if (file.exists(arq_cache)) {
-    load(file = arq_cache)  # carrega 'detalhes_modelo' se existir
+    load(file = arq_cache)
+    print("Carreguei dados do cache")
+    # carrega 'detalhes_modelo' se existir
   }
 
   # percorre todas as (série, variável)

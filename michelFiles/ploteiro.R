@@ -16,7 +16,7 @@ ggplot(df, aes(x = event_plus_det, y = time_metric)) +
   theme_minimal()
 
 #com log
-ggplot(df, aes(x = event_plus_det + 0.001, y = time_metric)) +
+ggplot(subset(df, tam_serie >= 1), aes(x = tam_serie, y = time_metric)) +
   geom_point(alpha = .6) +
   geom_smooth(method = "lm", se = FALSE, linetype = "dashed", color = "blue") +
   scale_x_log10() +
@@ -27,16 +27,20 @@ ggplot(df, aes(x = event_plus_det + 0.001, y = time_metric)) +
   ) +
   theme_minimal()
 
-
-
-ggplot(df, aes(x = ed_complex, y = time_metric)) +
+#com log
+ggplot(subset(df, event_plus_det >= 0), aes(x = event_plus_det, y = time_metric)) +
   geom_point(alpha = .6) +
-  geom_smooth(method = "lm", se = FALSE) +
-  labs(x = "Proporção de E+D de casos complexos", y = "Tempo de avaliação (s)") +
+  geom_smooth(method = "lm", se = FALSE, linetype = "dashed", color = "blue") +
+  scale_x_log10() +
+  scale_y_log10() +
+  labs(
+    x = "Tamanho da série (escala log10)",
+    y = "Tempo de avaliação (s, escala log10)"
+  ) +
   theme_minimal()
 
-#com log
-ggplot(df, aes(x = ed_complex + 0.001, y = time_metric)) +
+
+ggplot(subset(df, ed_complex >= 1), aes(x = ed_complex, y = time_metric)) +
   geom_point(alpha = .6) +
   geom_smooth(method = "lm", se = FALSE) +
   scale_x_log10() +
@@ -48,6 +52,7 @@ ggplot(df, aes(x = ed_complex + 0.001, y = time_metric)) +
   theme_minimal()
 
 
+
 #Densidade de tempo por linearidade
 ggplot(df, aes(x = time_metric, fill = linear_behavior)) +
   geom_density(alpha = 0.4, adjust = 1.5) +
@@ -55,17 +60,39 @@ ggplot(df, aes(x = time_metric, fill = linear_behavior)) +
   labs(x = "Tempo de avaliação (s, escala log)", fill = "Linearidade") +
   theme_minimal()
 
-ggplot(df, aes(x = (p_ed_simple + p_ed_medium), fill = linear_behavior)) +
+# simple e medios
+df2 <- df %>%
+  mutate(
+    p_ed_simple_0 = coalesce(p_ed_simple, 0),
+    p_ed_medium_0 = coalesce(p_ed_medium, 0)
+  )
+
+ggplot(df2, aes(x = p_ed_simple_0 + p_ed_medium_0, fill = linear_behavior)) +
   geom_density(alpha = 0.4, adjust = 1.5) +
-  scale_x_log10() +
   labs(x = "Ocorrências em casos simples e médios", fill = "Linearidade") +
   theme_minimal()
 
-ggplot(df, aes(x = p_ed_complex, fill = linear_behavior)) +
+
+df2 <- df %>%
+  mutate(
+    p_ed_complex_pct = coalesce(p_ed_complex, 0) * 100
+  )
+
+ggplot(
+  df2,
+  aes(
+    x = p_ed_complex_pct + 0.01,   # evita log(0)
+    fill = linear_behavior
+  )
+) +
   geom_density(alpha = 0.4, adjust = 1.5) +
   scale_x_log10() +
-  labs(x = "Porcentagem de ocorrências em casos complexos", fill = "Linearidade") +
+  labs(
+    x = "Porcentagem de ocorrências em casos complexos (%, log10)",
+    fill = "Linearidade"
+  ) +
   theme_minimal()
+
 
 #Densidade de tempo por linearidade
 ggplot(df, aes(x = ed_complex, fill = linear_behavior)) +
@@ -101,6 +128,23 @@ ggplot(df_media_tam, aes(x = reorder(dataset, media_tam_serie), y = media_tam_se
     title = "Média do tamanho das séries por dataset",
     x = "Dataset",
     y = "Tamanho médio das séries"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    legend.position = "none",
+    panel.grid.major.y = element_blank(),
+    axis.text.y = element_text(size = 11)
+  )
+
+ggplot(df_media_tam, aes(x = reorder(dataset, media_tam_serie),
+                         y = media_tam_serie, fill = dataset)) +
+  geom_col(alpha = 0.8, width = 0.7) +
+  scale_y_log10() +
+  coord_flip() +
+  labs(
+    title = "Média do tamanho das séries por dataset",
+    x = "Dataset",
+    y = "Tamanho médio das séries (log10)"
   ) +
   theme_minimal(base_size = 13) +
   theme(
