@@ -1,36 +1,43 @@
-#'@title Evaluation of event detection
-#'@description Evaluation of event detection using SoftED <doi:10.48550/arXiv.2304.00439>
-#'@param sw_size tolerance window size
-#'@return `har_eval_soft` object
-#'@examples
-#'library(daltoolbox)
+#' @title Evaluation of event detection (SoftED)
+#' @description Soft evaluation of event detection using SoftED <doi:10.48550/arXiv.2304.00439>.
+#' @param sw_size Integer. Tolerance window size for soft matching.
+#' @return `har_eval_soft` object
 #'
-#'#loading the example database
-#'data(examples_anomalies)
+#' @examples
+#' library(daltoolbox)
 #'
-#'#Using the simple
-#'dataset <- examples_anomalies$simple
-#'head(dataset)
+#' # Load anomaly example data
+#' data(examples_anomalies)
 #'
-#'# setting up time change point using GARCH
-#'model <- hcp_garch()
+#' # Use the simple series
+#' dataset <- examples_anomalies$simple
+#' head(dataset)
 #'
-#'# fitting the model
-#'model <- fit(model, dataset$serie)
+#' # Configure a change-point detector (GARCH)
+#' model <- hcp_garch()
 #'
-#'# making detections
-#'detection <- detect(model, dataset$serie)
+#' # Fit the detector
+#' model <- fit(model, dataset$serie)
 #'
-#'# filtering detected events
-#'print(detection[(detection$event),])
+#' # Run detection
+#' detection <- detect(model, dataset$serie)
 #'
-#'# evaluating the detections
-#'evaluation <- evaluate(har_eval_soft(), detection$event, dataset$event)
-#'print(evaluation$confMatrix)
+#' # Show detected events
+#' print(detection[(detection$event),])
 #'
-#'# ploting the results
-#'grf <- har_plot(model, dataset$serie, detection, dataset$event)
-#'plot(grf)
+#' # Evaluate detections (SoftED)
+#' evaluation <- evaluate(har_eval_soft(), detection$event, dataset$event)
+#' print(evaluation$confMatrix)
+#'
+#' # Plot the results
+#' grf <- har_plot(model, dataset$serie, detection, dataset$event)
+#' plot(grf)
+#'
+#' @references
+#' - Salles, R., Lima, J., Reis, M., Coutinho, R., Pacitti, E., Masseglia, F., Akbarinia, R.,
+#'   Chen, C., Garibaldi, J., Porto, F., Ogasawara, E. SoftED: Metrics for soft evaluation of
+#'   time series event detection. Computers and Industrial Engineering, 2024.
+#'   doi:10.1016/j.cie.2024.110728
 #'@export
 har_eval_soft <- function(sw_size = 15) {
   obj <- har_eval()
@@ -39,46 +46,32 @@ har_eval_soft <- function(sw_size = 15) {
   return(obj)
 }
 
-soft_scores <- function(detection, event, k){
-  E <- which(event)
-  m <- length(E)
-
-  D <- which(detection)
-  n <- length(D)
-
-  mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
-
-  Mu <- matrix(NA,nrow = n, ncol = m)
-  for(j in 1:m) for(i in 1:n) Mu[i,j] <- mu(j,i,E,D,k)
-
-  E_d <- list()
-  for(i in 1:n) E_d[[i]] <- which(Mu[i,] == max(Mu[i,]))
-
-  D_e <- list()
-  for(j in 1:m) D_e[[j]] <- which(sapply(1:n, function(i) j %in% E_d[[i]] & Mu[i,j] > 0))
-
-  d_e <- c()
-  for(j in 1:m) {
-    if(length(D_e[[j]])==0) d_e[j] <- NA
-    else d_e[j] <- D_e[[j]][which.max(sapply(D_e[[j]], function(i) Mu[i,j]))]
-  }
-
-  S_e <- c()
-  for(j in 1:m) {
-    if(length(D_e[[j]])==0) S_e[j] <- NA
-    #else S_e[j] <- sum(sapply(D_e[[j]], function(i) Mu[i,j])) / length(D_e[[j]]) #mean
-    else S_e[j] <- max(sapply(D_e[[j]], function(i) Mu[i,j]))  #max
-  }
-
-  S_d <- c()
-  for(i in 1:n) S_d[i] <- max(S_e[which(d_e == i)], 0)
-
-  return(S_d)
-}
 
 #'@importFrom daltoolbox evaluate
-#'@export
+#'@importFrom RcppHungarian HungarianSolver
+#'@exportS3Method evaluate har_eval_soft
 evaluate.har_eval_soft <- function(obj, detection, event, ...) {
+  soft_scores <- function(detection, event, k){
+    E <- which(event)
+    m <- length(E)
+
+    D <- which(detection)
+    n <- length(D)
+
+    mu <- function(j,i,E,D,k) max(min( (D[i]-(E[j]-k))/k, ((E[j]+k)-D[i])/k ), 0)
+
+    Mu <- matrix(NA,nrow = n, ncol = m)
+    for(j in 1:m) for(i in 1:n) Mu[i,j] <- mu(j,i,E,D,k)
+
+    associationMatrix <- RcppHungarian::HungarianSolver(-1*Mu)
+    S_d <- Mu[associationMatrix$pairs]
+    len_S_d <- length(S_d)
+    scores <- numeric(n)
+    scores[seq_len(len_S_d)] <- S_d[seq_len(len_S_d)]
+
+    return(scores)
+  }
+
   detection[is.na(detection)] <- FALSE
 
   if((sum(detection)==0) || (sum(event)==0)){
