@@ -219,30 +219,6 @@ ggplot(df_media_eventos, aes(x = reorder(dataset, media_eventos),
   )
 
 
-#### BOXPLOT PRECISION RECALL E F1 ##########
-
-suppressPackageStartupMessages({
-  library(dplyr)
-  library(tidyr)
-  library(ggplot2)
-})
-
-# Mantém só as métricas e empilha em formato longo
-df_long <- resumo_experimentos %>%
-  select(precision, recall, f1) %>%
-  pivot_longer(everything(), names_to = "metric", values_to = "value") %>%
-  mutate(value = as.numeric(value)) %>%
-  filter(is.finite(value))  # remove NA/NaN/Inf
-
-# Boxplot
-ggplot(df_long, aes(x = metric, y = value, fill = metric)) +
-  geom_boxplot(outlier.alpha = 0.25) +
-  labs(x = NULL, y = "Score", title = "Distribuição de métricas") +
-  theme_minimal() +
-  theme(legend.position = "none")
-
-
-
 ######################################################
 ########## REGISTRO DE TEMPO DE EXECUCAO #############
 ######################################################
@@ -252,8 +228,8 @@ suppressPackageStartupMessages({
 })
 
 # Rótulo deste “run” para compor o nome do arquivo
-#run_label <- "run_softed"
-run_label <- "run_softedpar"
+run_label <- "run_softed"
+#run_label <- "run_softedpar"
 #run_label <- "run_smartsofted"
 
 time_by_dataset <- resumo_experimentos %>%
