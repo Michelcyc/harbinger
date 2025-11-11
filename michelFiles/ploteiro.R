@@ -241,15 +241,20 @@ ggplot(df_long, aes(x = metric, y = value, fill = metric)) +
   theme_minimal() +
   theme(legend.position = "none")
 
+
+
+######################################################
 ########## REGISTRO DE TEMPO DE EXECUCAO #############
+######################################################
+
 suppressPackageStartupMessages({
   library(dplyr)
 })
 
 # Rótulo deste “run” para compor o nome do arquivo
 #run_label <- "run_softed"
-run_label <- "run_softedpar"
-#run_label <- "run_smartsofted"
+#run_label <- "run_softedpar"
+run_label <- "run_smartsofted"
 
 time_by_dataset <- resumo_experimentos %>%
   group_by(dataset) %>%
