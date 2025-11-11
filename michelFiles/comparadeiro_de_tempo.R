@@ -7,9 +7,9 @@ suppressPackageStartupMessages({
 })
 
 # Rótulo deste “run” para compor o nome do arquivo
-run_label <- "run_softed"
+#run_label <- "run_softed"
 #run_label <- "run_softedpar"
-#run_label <- "run_smartsofted"
+run_label <- "run_smartsofted"
 
 time_by_dataset <- resumo_experimentos %>%
   group_by(dataset) %>%
@@ -32,7 +32,7 @@ save(
 print(time_by_dataset, n = Inf)
 
 
-
+### Comparadeiro mesmo ###
 
 suppressPackageStartupMessages({
   library(dplyr)
@@ -88,81 +88,51 @@ all_runs <- all_runs |>
   complete(dataset, run, fill = list(total_time = 0))
 
 # ordena os datasets pelo tempo total do run 'smartsofted' (mude se quiser outro critério)
+#Troquei por "softed", era "smartsofted"
 ordem <- all_runs |>
   group_by(dataset) |>
-  summarise(ref = sum(total_time[run == "smartsofted"], na.rm = TRUE)) |>
+  summarise(ref = sum(total_time[run == "softed"], na.rm = TRUE)) |>
   arrange(desc(ref)) |>
   pull(dataset)
 
-ggplot(all_runs, aes(x = factor(dataset, levels = ordem), y = total_time, fill = run)) +
-  geom_col(position = position_dodge(width = 0.8), width = 0.7) +
-  coord_flip() +
-  labs(
-    title = "Tempo total por dataset (comparação entre runs)",
-    x = "Dataset",
-    y = "Tempo total (s)",
-    fill = "Run"
-  ) +
-  theme_minimal(base_size = 13) +
-  theme(panel.grid.major.y = element_blank())
-
-## Outro
+## Comparando tempo ##
 
 library(dplyr)
 library(ggplot2)
 library(scales)
-
-# Evita log(0)
-eps <- 1e-6
-all_runs_abs <- all_runs %>%
-  mutate(total_time_eps = pmax(total_time, eps))
-
-# Ordena datasets pelo tempo total somado (maior → menor)
-ordem_abs <- all_runs_abs %>%
-  group_by(dataset) %>%
-  summarise(total = sum(total_time_eps, na.rm = TRUE), .groups = "drop") %>%
-  arrange(desc(total)) %>%
-  pull(dataset)
-
-ggplot(all_runs_abs, aes(x = factor(dataset, levels = ordem_abs),
-                         y = total_time_eps, fill = run)) +
-  geom_col(position = position_dodge(width = 0.8), width = 0.7) +
-  coord_flip() +
-  scale_y_log10(labels = label_number()) +
-  labs(
-    title = "Tempo total por dataset (escala log10)",
-    x = "Dataset",
-    y = "Tempo total (s, log10)",
-    fill = "Run"
-  ) +
-  theme_minimal(base_size = 13) +
-  theme(panel.grid.major.y = element_blank())
-
-# Outro 2
 
 all_runs_rel <- all_runs %>%
   group_by(dataset) %>%
   mutate(time_rel = total_time / min(total_time, na.rm = TRUE)) %>%
   ungroup()
 
-# Ordena datasets pelo pior (maior) fator relativo
 ordem_rel <- all_runs_rel %>%
   group_by(dataset) %>%
   summarise(max_rel = max(time_rel, na.rm = TRUE), .groups = "drop") %>%
   arrange(desc(max_rel)) %>%
   pull(dataset)
 
-ggplot(all_runs_rel, aes(x = factor(dataset, levels = ordem_rel),
-                         y = pmax(time_rel, 1e-6), fill = run)) +
+ggplot(all_runs_rel,
+       aes(x = factor(dataset, levels = ordem_rel),
+           y = pmax(time_rel, 1e-6),
+           fill = run)) +
   geom_col(position = position_dodge(width = 0.8), width = 0.7) +
   coord_flip() +
-  scale_y_log10(breaks = c(1, 2, 5, 10, 20, 50, 100),
-                minor_breaks = NULL) +
+  scale_y_continuous(
+    trans  = log2_trans(),
+    breaks = c(1, 2, 4, 8, 16, 32, 64, 128, 256)
+  ) +
   labs(
-    title = "Tempo relativo por dataset (mais rápido = 1, escala log10)",
-    x = "Dataset",
-    y = "Fator × mais lento",
-    fill = "Run"
+    title = "Tempo relativo por dataset (mais rápido = 1)",
+    x     = "Dataset",
+    y     = "Multiplicador de tempo (vs. mais rápido)",
+    fill  = NULL
   ) +
   theme_minimal(base_size = 13) +
-  theme(panel.grid.major.y = element_blank())
+  theme(
+    panel.grid.major.y = element_blank(),
+    legend.position    = "bottom",
+    legend.text        = element_text(size = 12),
+    legend.title       = element_text(size = 12)
+  )
+

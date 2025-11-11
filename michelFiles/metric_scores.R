@@ -22,16 +22,21 @@ ggplot(df_long, aes(x = metric, y = value, fill = metric)) +
   theme_minimal() +
   theme(legend.position = "none")
 
-# depois de gerar resumo_experimentos
+###########################################
+## Salvando métricas ####
+###########################################
+
 #nome <- "metricas_SoftED.RData"
-nome <- "metricas_SoftEDPAR.RData"
-#nome <- "metricas_smartSoftED.RData"
+#nome <- "metricas_SoftEDPAR.RData"
+nome <- "metricas_smartSoftED.RData"
 metricas_exp <- resumo_experimentos %>%
   select(precision, recall, f1)
 
 save(metricas_exp, file = nome)
 
-# Box plots das 3 #
+###########################################
+## 3 BOX PLOTS DOS 3 (9) ####
+###########################################
 
 library(dplyr)
 library(tidyr)
@@ -47,76 +52,49 @@ metricas_exp2 <- metricas_exp %>% mutate(experimento = "exp2")
 load("metricas_smartSoftED.RData")
 metricas_exp3 <- metricas_exp %>% mutate(experimento = "exp3")
 
-# empilha tudo
-df_all <- bind_rows(metricas_exp1, metricas_exp2, metricas_exp3)
+###########################################
+## Coordenadas paralelas ####
+###########################################
 
-# formato longo
-df_long_all <- df_all %>%
-  pivot_longer(c(precision, recall, f1),
-               names_to = "metric",
-               values_to = "value") %>%
-  mutate(value = as.numeric(value)) %>%
-  filter(is.finite(value))
-ggplot(df_long_all, aes(x = metric, y = value, fill = experimento)) +
-  geom_boxplot(position = position_dodge(width = 0.8),
-               outlier.alpha = 0.25) +
-  labs(x = NULL, y = "Score", title = "Distribuição das métricas por experimento") +
-  theme_minimal()
-#Se você quiser só 3 boxplots (um experimento só), é basicamente o código que você já tem,
-# usando df_long em vez de df_long_all.
-
-
-## Gráfico de coordenadas paralelas ##
-
-# metricas_exp1 , 2, e 3 já obtidos da etapa anterior
-
-# Aqui pressuponho que as linhas estão na mesma ordem nos 3 objetos
-df_coord <- tibble::tibble(
-  Exp1_Precision = metricas_exp1$precision,
-  Exp2_Precision = metricas_exp2$precision,
-  Exp3_Precision = metricas_exp3$precision,
-  Exp1_Recall    = metricas_exp1$recall,
-  Exp2_Recall    = metricas_exp2$recall,
-  Exp3_Recall    = metricas_exp3$recall
+# Precisão
+df_prec <- tibble::tibble(
+  softed      = metricas_exp1$precision,
+  softedpar   = metricas_exp2$precision,
+  smartsofted = metricas_exp3$precision
 )
 
-# Plot dos precisions
-
-install.packages("GGally")  # se ainda não tiver
-library(GGally)
-library(ggplot2)
-
 ggparcoord(
-  data        = df_coord,
-  columns     = 1:3,            # as 6 colunas na ordem desejada
-  scale       = "globalminmax", # tudo na escala [0,1]
+  data        = df_prec,
+  columns     = 1:3,
+  scale       = "globalminmax",
   showPoints  = FALSE,
-  alphaLines  = 0.3
+  alphaLines  = 0.1
 ) +
   labs(
-    title = "Coordenadas paralelas: Precision (E1–E3) e Recall (E1–E3)",
+    title = "Coordenadas paralelas (Precisão)",
     x = NULL,
-    y = "Score (normalizado)"
+    y = "Precisão"
   ) +
   theme_minimal()
 
-# Plot dos recalls
-
-install.packages("GGally")  # se ainda não tiver
-library(GGally)
-library(ggplot2)
+# Revocação
+df_rec <- tibble::tibble(
+  softed      = metricas_exp1$recall,
+  softedpar   = metricas_exp2$recall,
+  smartsofted = metricas_exp3$recall
+)
 
 ggparcoord(
-  data        = df_coord,
-  columns     = 4:6,            # as 6 colunas na ordem desejada
-  scale       = "globalminmax", # tudo na escala [0,1]
+  data        = df_rec,
+  columns     = 1:3,
+  scale       = "globalminmax",
   showPoints  = FALSE,
-  alphaLines  = 0.3
+  alphaLines  = 0.1
 ) +
   labs(
-    title = "Coordenadas paralelas: Precision (E1–E3) e Recall (E1–E3)",
+    title = "Coordenadas paralelas (Revocação)",
     x = NULL,
-    y = "Score (normalizado)"
+    y = "Revocação"
   ) +
   theme_minimal()
 
