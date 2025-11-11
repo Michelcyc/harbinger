@@ -253,8 +253,8 @@ suppressPackageStartupMessages({
 
 # Rótulo deste “run” para compor o nome do arquivo
 #run_label <- "run_softed"
-#run_label <- "run_softedpar"
-run_label <- "run_smartsofted"
+run_label <- "run_softedpar"
+#run_label <- "run_smartsofted"
 
 time_by_dataset <- resumo_experimentos %>%
   group_by(dataset) %>%
