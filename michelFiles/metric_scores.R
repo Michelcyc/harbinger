@@ -23,8 +23,8 @@ ggplot(df_long, aes(x = metric, y = value, fill = metric)) +
   theme(legend.position = "none")
 
 # depois de gerar resumo_experimentos
-nome <- "metricas_SoftED.RData"
-#nome <- "metricas_SoftEDPAR.RData"
+#nome <- "metricas_SoftED.RData"
+nome <- "metricas_SoftEDPAR.RData"
 #nome <- "metricas_smartSoftED.RData"
 metricas_exp <- resumo_experimentos %>%
   select(precision, recall, f1)
