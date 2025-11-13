@@ -387,7 +387,7 @@ for (k in seq_along(detalhes_todos)) {
   num_eventos <- if ("event" %in% names(dados_k)) {
     count_true(dados_k$event)
   } else {
-    NA_integer_
+    0L
   }
 
   num_deteccoes <- count_true(exp_k$rs$event)
@@ -400,13 +400,14 @@ for (k in seq_along(detalhes_todos)) {
   )
   tempo_metrica <- as.double(Sys.time() - t0, units = "secs")
 
-  n_cases_simple   <- as.integer(get1(avaliacao_soft, "n_cases_simple",  NA_integer_))
-  n_cases_medium   <- as.integer(get1(avaliacao_soft, "n_cases_medium",  NA_integer_))
-  n_cases_complex  <- as.integer(get1(avaliacao_soft, "n_cases_complex", NA_integer_))
-  ed_simple        <- as.integer(get1(avaliacao_soft, "ed_simple",  NA_integer_))
-  ed_medium        <- as.integer(get1(avaliacao_soft, "ed_medium",  NA_integer_))
-  ed_complex       <- as.integer(get1(avaliacao_soft, "ed_complex", NA_integer_))
-  sigma_max_de3    <- as.numeric(get1(avaliacao_soft, "sigma_max_de3",   NA_real_))
+  n_cases_simple   <- as.integer(get1(avaliacao_soft, "n_cases_simple",   0L))
+  n_cases_medium   <- as.integer(get1(avaliacao_soft, "n_cases_medium",   0L))
+  n_cases_complex  <- as.integer(get1(avaliacao_soft, "n_cases_complex",  0L))
+  ed_simple        <- as.integer(get1(avaliacao_soft, "ed_simple",        0L))
+  ed_medium        <- as.integer(get1(avaliacao_soft, "ed_medium",        0L))
+  ed_complex       <- as.integer(get1(avaliacao_soft, "ed_complex",       0L))
+  sigma_max_de3    <- as.numeric(get1(avaliacao_soft, "sigma_max_de3",    0))
+
 
   linear_behavior <- !is.na(sigma_max_de3) &&
     !is.na(num_eventos) &&
