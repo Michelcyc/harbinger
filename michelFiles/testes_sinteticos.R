@@ -227,42 +227,8 @@ time_df <- as.data.frame(time_mat) %>%
   filter(!is.na(time_sec))  # garante que não entra NA no heatmap
 
 
-# Heatmap #
+# Heatmap de 60 segundos #
 
-ggplot(time_df, aes(x = n, y = frac, fill = time_sec)) +
-  geom_tile() +
-  scale_x_log10(
-    breaks = sort(unique(time_df$n)),
-    labels = label_number(accuracy = 1)  # mostra 100, 1000, 10000...
-  ) +
-  scale_y_continuous(
-    breaks = sort(unique(time_df$frac)),
-    labels = percent_format(accuracy = 0.1)  # mostra 0.1%, 0.2%, ...
-  ) +
-  scale_fill_viridis_c(
-    option = "plasma",  # pode trocar: "magma", "viridis", etc.
-    name   = "Tempo (s)"
-  ) +
-  labs(
-    x = "Tamanho da série (n)",
-    y = "Proporção de eventos/detecções",
-    title = "Tempo de execução da métrica por tamanho de série e proporção de eventos"
-  ) +
-  theme_minimal(base_size = 13) +
-  theme(
-    panel.grid = element_blank()
-  )
-
-# Para eixo y invertido
-#+ scale_y_reverse(
-#  breaks = sort(unique(time_df$frac)),
-#  labels = percent_format(accuracy = 0.1)
-#)
-
-
-########## Tentativa 2 #############
-
-# LONG
 time_df <- as.data.frame(time_mat) %>%
   mutate(n = as.numeric(sub("n_", "", rownames(time_mat)))) %>%
   pivot_longer(
@@ -292,13 +258,55 @@ ggplot(time_df, aes(x = n, y = frac, fill = time_sec)) +
     name   = "Tempo (s)"
   ) +
   labs(
-    x = "Tamanho da série (n, log10)",
+    x = "Tamanho da série (log10)",
     y = "Proporção de eventos/detecções (log2)",
-    title = "Tempo de execução da métrica por tamanho de série e proporção de eventos"
+    title = NULL
   ) +
   theme_minimal(base_size = 13) +
   theme(
     panel.grid = element_blank()
   )
 
-######## Outro heatmap #############
+######## Outro heatmap de 3 segundos #############
+
+# time_df já definido como antes
+time_df <- as.data.frame(time_mat) %>%
+  mutate(n = as.numeric(sub("n_", "", rownames(time_mat)))) %>%
+  pivot_longer(
+    cols      = starts_with("frac_"),
+    names_to  = "frac_label",
+    values_to = "time_sec"
+  ) %>%
+  mutate(
+    frac = as.numeric(sub("frac_", "", frac_label))
+  ) %>%
+  filter(!is.na(time_sec))
+
+ggplot(time_df, aes(x = n, y = frac, fill = time_sec)) +
+  geom_tile() +
+  scale_x_log10(
+    breaks = sort(unique(time_df$n)),
+    labels = label_number(accuracy = 1)
+  ) +
+  scale_y_continuous(
+    trans  = log2_trans(),
+    breaks = sort(unique(time_df$frac)),
+    labels = percent_format(accuracy = 0.1)
+  ) +
+  scale_fill_viridis_c(
+    option = "plasma",
+    name   = "Tempo (s)",
+    limits = c(0, 3),              # foca em 0–3 s
+    oob    = scales::squish,       # >3 fica "achatado" em 3
+    breaks = seq(0, 3, by = 0.5)   # ajusta se quiser mais/menos ticks
+  ) +
+  labs(
+    x = "Tamanho da série (log10)",
+    y = "Proporção de eventos/detecções (log2)",
+    title = NULL
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    panel.grid = element_blank()
+  )
+
