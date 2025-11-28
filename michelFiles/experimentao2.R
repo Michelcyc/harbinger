@@ -119,7 +119,7 @@ dataset_names_mv <- c(
 # datasets considerados "grandes" para REMD
 big_datasets_remd <- c("mit_bih_MLII", "mit_bih_V1", "mit_bih_V2", "mit_bih_V5", "gecco", "ucr_ecg", "ucr_int_bleeding", "ucr_nasa",
                        "ucr_power_demand", "oil_3w_Type_1", "oil_3w_Type_2", "oil_3w_Type_4", "oil_3w_Type_5", "oil_3w_Type_6",
-                       "oil_3w_Type_7", "oil_3w_Type_8")#, "nab_realKnownCause", "nab_realTraffic", "nab_realTweets")
+                       "oil_3w_Type_7", "oil_3w_Type_8", "nab_realKnownCause", "nab_realTraffic", "nab_realTweets")
 ######################
 #######################
 ############### LEMBRA DE COMPLETAR O TESTE COM ESSES 3 NABs ##################
