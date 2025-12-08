@@ -52,7 +52,6 @@ har_eval_soft <- function(sw_size = 15) {
 #'@exportS3Method evaluate har_eval_soft
 evaluate.har_eval_soft <- function(obj, detection, event, ...) {
   soft_scores <- function(detection, event, k){
-    # --- funções internas conforme solicitado ---
     detection_score <- function(d, e, k) {
       pmax(pmin((d - (e - k)) / k, ((e + k) - d) / k), 0)
     }

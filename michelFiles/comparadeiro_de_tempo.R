@@ -123,9 +123,8 @@ ggplot(all_runs_rel,
     breaks = c(1, 2, 4, 8, 16, 32, 64, 128, 256)
   ) +
   labs(
-    title = "Tempo relativo por dataset (mais rápido = 1)",
-    x     = "Dataset",
-    y     = "Multiplicador de tempo (vs. mais rápido)",
+    x     = "Conjunto de dados",
+    y     = "Multiplicador de tempo (relativo ao mais rápido)",
     fill  = NULL
   ) +
   theme_minimal(base_size = 13) +
@@ -136,3 +135,42 @@ ggplot(all_runs_rel,
     legend.title       = element_text(size = 12)
   )
 
+#### Média de tempo de execução ####
+
+# Calcula a média do tempo total por métrica (run)
+medias <- all_runs %>%
+  group_by(run) %>%
+  summarise(media_tempo = mean(total_time, na.rm = TRUE), .groups = "drop")
+
+# Imprime no formato desejado
+for (i in seq_len(nrow(medias))) {
+  cat(sprintf("Média do tempo de %s: %.6f\n",
+              medias$run[i],
+              medias$media_tempo[i]))
+}
+
+# Casos atípicos
+
+datasets_desejados <- c(
+  "A2Benchmark",
+  "nab_realTraffic",
+  "A1Benchmark",
+  "nab_realAdExchange"
+)
+
+tempos_especificos <- all_runs %>%
+  filter(dataset %in% datasets_desejados)
+
+print(tempos_especificos, n = Inf)
+
+medias_especificas <- all_runs %>%
+  filter(dataset %in% datasets_desejados) %>%
+  group_by(run) %>%
+  summarise(media_tempo = mean(total_time, na.rm = TRUE), .groups = "drop")
+
+# Imprimir no formato desejado
+for (i in seq_len(nrow(medias_especificas))) {
+  cat(sprintf("Média do tempo de %s nos datasets selecionados: %.6f\n",
+              medias_especificas$run[i],
+              medias_especificas$media_tempo[i]))
+}
